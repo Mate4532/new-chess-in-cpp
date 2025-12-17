@@ -120,6 +120,10 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
+      <Optimization>Full</Optimization>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -127,11 +131,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Attacks.cpp" />
     <ClCompile Include="Board.cpp" />
     <ClCompile Include="MoveGenerator.cpp" />
     <ClCompile Include="new chess in cpp.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Attacks.h" />
     <ClInclude Include="Board.h" />
     <ClInclude Include="BoardState.h" />
     <ClInclude Include="Move.h" />
