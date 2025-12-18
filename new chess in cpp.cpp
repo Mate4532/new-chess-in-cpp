@@ -14,7 +14,7 @@ int main() {
 
     auto start = std::chrono::high_resolution_clock::now();
 
-    uint64_t nodes = board.Perft(perftDepth);
+    uint64_t nodes = 0;
 
     auto end = std::chrono::high_resolution_clock::now();
 
@@ -29,6 +29,8 @@ int main() {
     std::cout << "Sebesseg: " << std::fixed << std::setprecision(0) << nps << " NPS (Nodes Per Second)" << std::endl;
     std::cout << "------------------------------------" << std::endl;
     board.PrintBoard();
+
+    board.MultiThreadedPerft(perftDepth);
 
     return 0;
 }

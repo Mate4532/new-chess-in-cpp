@@ -7,6 +7,7 @@
 #include <memory>
 #include <vector>
 #include <sstream>
+#include <atomic>
 
 extern uint64_t pawn_attacks_table[2][64];
 extern uint64_t knight_attacks_table[64];
@@ -74,5 +75,6 @@ public:
     void UndoMove(Move move);
     uint64_t PerftDivide(int depth);
     uint64_t Perft(int depth);
+    uint64_t MultiThreadedPerft(int depth);
     void PrintBoard() const;
 };

@@ -2,17 +2,21 @@
 #include <cstdint>
 #include <iostream>
 #include "MoveGenerator.h"
+#include <chrono>
+#include <thread>
 
 uint64_t pawn_attacks_table[2][64];
 uint64_t knight_attacks_table[64];
 uint64_t king_attacks_table[64];
+
+std::atomic<uint64_t> global_node_count(0);
 
 Board::Board() {
     InitializeBoard();
 }
 
 void Board::InitializeBoard() {
-    LoadFEN("");
+    LoadFEN("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10 ");
     InitializeAttackTables();
 }
 
@@ -467,3 +471,52 @@ void Board::PrintBoard() const {
     std::cout << "Jatekban levo szin: " << ((m_side_to_move == WHITE) ? "Feher" : "Fekete") << std::endl;
 }
 
+void perft_thread_worker(Board board_copy, std::vector<Move> moves_to_test, int depth) {
+    uint64_t local_nodes = 0;
+
+    for (const auto& move : moves_to_test) {
+        if (board_copy.MakeMove(move)) {
+            local_nodes += board_copy.Perft(depth - 1);
+            board_copy.UndoMove(move);
+        }
+    }
+
+    global_node_count += local_nodes;
+}
+
+uint64_t Board::MultiThreadedPerft(int depth) {
+    auto start_time = std::chrono::high_resolution_clock::now();
+
+    std::vector<Move> root_moves = MoveGenerator::GenerateMoves(*this);
+
+    unsigned int num_threads = std::thread::hardware_concurrency();
+    if (num_threads == 0) num_threads = 4;
+
+    std::vector<std::thread> threads;
+    std::vector<std::vector<Move>> move_chunks(num_threads);
+
+    for (size_t i = 0; i < root_moves.size(); ++i) {
+        move_chunks[i % num_threads].push_back(root_moves[i]);
+    }
+
+    global_node_count = 0;
+    std::cout << "Inditas " << num_threads << " szalon..." << std::endl;
+
+    for (int i = 0; i < num_threads; ++i) {
+        if (move_chunks[i].empty()) continue;
+
+        threads.emplace_back(perft_thread_worker, *this, move_chunks[i], depth);
+    }
+
+    for (auto& t : threads) {
+        if (t.joinable()) t.join();
+    }
+
+    auto end_time = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed = end_time - start_time;
+
+    uint64_t nodes = global_node_count;
+    double nps = nodes / elapsed.count();
+
+    return global_node_count;
+}
