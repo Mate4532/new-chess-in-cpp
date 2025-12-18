@@ -6,6 +6,11 @@
 #include "Move.h"
 #include <memory>
 #include <vector>
+#include <sstream>
+
+extern uint64_t pawn_attacks_table[2][64];
+extern uint64_t knight_attacks_table[64];
+extern uint64_t king_attacks_table[64];
 
 class Board {
 private:
@@ -26,6 +31,9 @@ private:
 public:
     Board();
     void InitializeBoard();
+    void InitializeAttackTables();
+    void LoadFEN(std::string fen);
+    PieceType getPieceAt(Square sq, Color color) const;
     uint64_t getBishopAttacks(Square sq, uint64_t occupied) const;
     uint64_t getKnightAttacks(Square sq) const;
     uint64_t getRookAttacks(Square sq, uint64_t occupied) const;
@@ -61,11 +69,10 @@ public:
     inline uint16_t getFullMoveNumber() const {
         return boardStateHistory[m_ply].full_move_number;
     }
-    PieceType getPieceAt(Square sq) const;
-    PieceType getPieceAt(Square sq, Color color) const;
     bool isSquareAttacked(Square sq, Color attackerColor) const;
     bool MakeMove(Move move);
     void UndoMove(Move move);
-    uint64_t Perft(int depth, bool useBulk);
+    uint64_t PerftDivide(int depth);
+    uint64_t Perft(int depth);
     void PrintBoard() const;
 };

@@ -3,55 +3,145 @@
 #include <iostream>
 #include "MoveGenerator.h"
 
+uint64_t pawn_attacks_table[2][64];
+uint64_t knight_attacks_table[64];
+uint64_t king_attacks_table[64];
+
 Board::Board() {
     InitializeBoard();
 }
 
 void Board::InitializeBoard() {
-    m_bitboards[WHITE][PAWN] = 0b0000000000000000000000000000000000000000000000001111111100000000ULL;
+    LoadFEN("");
+    InitializeAttackTables();
+}
 
-    m_bitboards[WHITE][KNIGHT] = 0b0000000000000000000000000000000000000000000000000000000001000010ULL;
-    m_bitboards[WHITE][BISHOP] = 0b0000000000000000000000000000000000000000000000000000000000100100ULL;
-    m_bitboards[WHITE][ROOK] = 0b0000000000000000000000000000000000000000000000000000000010000001ULL;
-    m_bitboards[WHITE][QUEEN] = 0b0000000000000000000000000000000000000000000000000000000000001000ULL;
-    m_bitboards[WHITE][KING] = 0b0000000000000000000000000000000000000000000000000000000000010000ULL;
+void Board::InitializeAttackTables() {
+    for (int sq = 0; sq < 64; sq++) {
+        uint64_t b = (1ULL << sq);
 
-    m_bitboards[BLACK][PAWN] = 0b0000000011111111000000000000000000000000000000000000000000000000ULL;
+        uint64_t k_attacks = 0;
+        k_attacks |= (b << 17) & ~FILE_A;
+        k_attacks |= (b << 15) & ~FILE_H;
+        k_attacks |= (b << 10) & ~(FILE_A | FILE_B);
+        k_attacks |= (b << 6) & ~(FILE_G | FILE_H);
+        k_attacks |= (b >> 17) & ~FILE_H;
+        k_attacks |= (b >> 15) & ~FILE_A;
+        k_attacks |= (b >> 10) & ~(FILE_G | FILE_H);
+        k_attacks |= (b >> 6) & ~(FILE_A | FILE_B);
+        knight_attacks_table[sq] = k_attacks;
 
-    m_bitboards[BLACK][KNIGHT] = 0b0100001000000000000000000000000000000000000000000000000000000000ULL;
-    m_bitboards[BLACK][BISHOP] = 0b0010010000000000000000000000000000000000000000000000000000000000ULL;
-    m_bitboards[BLACK][ROOK] = 0b1000000100000000000000000000000000000000000000000000000000000000ULL;
-    m_bitboards[BLACK][QUEEN] = 0b0000100000000000000000000000000000000000000000000000000000000000ULL;
-    m_bitboards[BLACK][KING] = 0b0001000000000000000000000000000000000000000000000000000000000000ULL;
+        uint64_t ki_attacks = 0;
+        ki_attacks |= (b << 8);
+        ki_attacks |= (b >> 8);
+        ki_attacks |= (b << 1) & ~FILE_A;
+        ki_attacks |= (b >> 1) & ~FILE_H;
+        ki_attacks |= (b << 7) & ~FILE_H;
+        ki_attacks |= (b << 9) & ~FILE_A;
+        ki_attacks |= (b >> 7) & ~FILE_A;
+        ki_attacks |= (b >> 9) & ~FILE_H;
+        king_attacks_table[sq] = ki_attacks;
 
-    m_side_occupancy[WHITE] =
-        m_bitboards[WHITE][PAWN] |
-        m_bitboards[WHITE][KNIGHT] |
-        m_bitboards[WHITE][BISHOP] |
-        m_bitboards[WHITE][ROOK] |
-        m_bitboards[WHITE][QUEEN] |
-        m_bitboards[WHITE][KING];
+        uint64_t w_pawn = 0;
+        w_pawn |= (b << 7) & ~FILE_H;
+        w_pawn |= (b << 9) & ~FILE_A;
+        pawn_attacks_table[WHITE][sq] = w_pawn;
 
-    m_side_occupancy[BLACK] =
-        m_bitboards[BLACK][PAWN] |
-        m_bitboards[BLACK][KNIGHT] |
-        m_bitboards[BLACK][BISHOP] |
-        m_bitboards[BLACK][ROOK] |
-        m_bitboards[BLACK][QUEEN] |
-        m_bitboards[BLACK][KING];
+        uint64_t b_pawn = 0;
+        b_pawn |= (b >> 7) & ~FILE_A;
+        b_pawn |= (b >> 9) & ~FILE_H;
+        pawn_attacks_table[BLACK][sq] = b_pawn;
+    }
+}
 
+void Board::LoadFEN(std::string fen) {
+    if (fen.empty()) {
+        fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    }
+
+    for (int c = 0; c < 2; c++) {
+        m_side_occupancy[c] = 0ULL;
+        for (int p = PAWN; p <= KING; p++) {
+            m_bitboards[c][p] = 0ULL;
+        }
+    }
+    m_all_occupancy = 0ULL;
+    m_ply = 0;
+
+    std::stringstream ss(fen);
+    std::string pieces, side, castling, enPassant, halfMove, fullMove;
+    ss >> pieces >> side >> castling >> enPassant >> halfMove >> fullMove;
+
+    int rank = 7;
+    int file = 0;
+    for (char c : pieces) {
+        if (c == '/') {
+            rank--;
+            file = 0;
+        }
+        else if (isdigit(c)) {
+            file += (c - '0');
+        }
+        else {
+            Color color = isupper(c) ? WHITE : BLACK;
+            PieceType type;
+            char lowerC = tolower(c);
+            if (lowerC == 'p') type = PAWN;
+            else if (lowerC == 'n') type = KNIGHT;
+            else if (lowerC == 'b') type = BISHOP;
+            else if (lowerC == 'r') type = ROOK;
+            else if (lowerC == 'q') type = QUEEN;
+            else if (lowerC == 'k') type = KING;
+
+            Square sq = (Square)(rank * 8 + file);
+            m_bitboards[color][type] |= (1ULL << sq);
+            file++;
+        }
+    }
+
+    m_side_to_move = (side == "w") ? WHITE : BLACK;
+
+    BoardState state;
+    state.castling_rights = 0;
+    if (castling != "-") {
+        for (char c : castling) {
+            if (c == 'K') state.castling_rights |= WHITE_KINGSIDE_CASTLE;
+            else if (c == 'Q') state.castling_rights |= WHITE_QUEENSIDE_CASTLE;
+            else if (c == 'k') state.castling_rights |= BLACK_KINGSIDE_CASTLE;
+            else if (c == 'q') state.castling_rights |= BLACK_QUEENSIDE_CASTLE;
+        }
+    }
+
+    if (enPassant == "-") {
+        state.en_passant_sq = SQUARE_NONE;
+    }
+    else {
+        int f = enPassant[0] - 'a';
+        int r = enPassant[1] - '1';
+        state.en_passant_sq = (Square)(r * 8 + f);
+    }
+
+    state.half_move_clock = halfMove.empty() ? 0 : stoi(halfMove);
+    state.full_move_number = fullMove.empty() ? 1 : stoi(fullMove);
+    state.captured_piece_type = PIECE_NONE;
+
+    for (int c = 0; c < 2; c++) {
+        for (int p = PAWN; p <= KING; p++) {
+            m_side_occupancy[c] |= m_bitboards[c][p];
+        }
+    }
     m_all_occupancy = m_side_occupancy[WHITE] | m_side_occupancy[BLACK];
 
-    m_side_to_move = WHITE;
-    m_ply = 0;
-    
-    BoardState initialState;
-    initialState.en_passant_sq = SQUARE_NONE;
-    initialState.castling_rights = ALL_CASTLING_RIGHTS;
-    initialState.half_move_clock = 0;
-    initialState.full_move_number = 1;
+    boardStateHistory[m_ply] = state;
+}
 
-    boardStateHistory[m_ply] = initialState;
+PieceType Board::getPieceAt(Square sq, Color color) const {
+    for (int piece = PAWN; piece <= KING; piece++) {
+        if (m_bitboards[color][piece] & (1ULL << sq)) {
+            return (PieceType)piece;
+        }
+    }
+    return PIECE_NONE;
 }
 
 uint64_t Board::getRookAttacks(Square sq, uint64_t occupied) const {
@@ -123,62 +213,31 @@ uint64_t Board::getKingAttacks(Square sq) const {
 
     attacks |= (bit << 8);
     attacks |= (bit >> 8);
-    attacks |= (bit << 1) & ~0x0101010101010101ULL;
-    attacks |= (bit >> 1) & ~0x8080808080808080ULL;
+    attacks |= (bit << 1) & ~FILE_A;
+    attacks |= (bit >> 1) & ~FILE_H;
 
-    attacks |= (bit << 7) & ~0x8080808080808080ULL;
-    attacks |= (bit << 9) & ~0x0101010101010101ULL;
-    attacks |= (bit >> 7) & ~0x0101010101010101ULL;
-    attacks |= (bit >> 9) & ~0x8080808080808080ULL;
+    attacks |= (bit << 7) & ~FILE_H;
+    attacks |= (bit << 9) & ~FILE_A;
+    attacks |= (bit >> 7) & ~FILE_A;
+    attacks |= (bit >> 9) & ~FILE_H;
 
     return attacks;
 }
 
 uint64_t Board::getInvertedPawnAttacks(Square sq, Color attackerColor) const {
-    uint64_t bit = (1ULL << sq);
-    uint64_t attacks = 0;
-    if (attackerColor == WHITE) {
-        attacks |= (bit >> 7) & ~0x0101010101010101ULL;
-        attacks |= (bit >> 9) & ~0x8080808080808080ULL;
-    }
-    else {
-        attacks |= (bit << 7) & ~0x8080808080808080ULL;
-        attacks |= (bit << 9) & ~0x0101010101010101ULL;
-    }
-    return attacks;
-}
 
-PieceType Board::getPieceAt(Square sq) const {
-
-    PieceType whitePiece = getPieceAt(sq, WHITE);
-    if (whitePiece != PIECE_NONE) return whitePiece;
-
-    return getPieceAt(sq, BLACK);
-}
-
-PieceType Board::getPieceAt(Square sq, Color color) const {
-
-    for (int piece = PAWN; piece <= KING; piece++) {
-        if (m_bitboards[color][piece] & (1ULL << sq)) {
-            return (PieceType)piece;
-        }
-    }
-
-    return PIECE_NONE;
+    return pawn_attacks_table[attackerColor ^ 1][sq];
 }
 
 bool Board::isSquareAttacked(Square sq, Color attackerColor) const {
+    if (pawn_attacks_table[attackerColor ^ 1][sq] & m_bitboards[attackerColor][PAWN]) return true;
 
-    uint64_t pawns = m_bitboards[attackerColor][PAWN];
-    if (getInvertedPawnAttacks(sq, (Color)!attackerColor) & pawns) return true;
+    if (knight_attacks_table[sq] & m_bitboards[attackerColor][KNIGHT]) return true;
+    if (king_attacks_table[sq] & m_bitboards[attackerColor][KING]) return true;
 
-    if (getKnightAttacks(sq) & m_bitboards[attackerColor][KNIGHT]) return true;
-
-    if (getKingAttacks(sq) & m_bitboards[attackerColor][KING]) return true;
-
-    uint64_t occupied = m_all_occupancy;
-    if (getBishopAttacks(sq, occupied) & (m_bitboards[attackerColor][BISHOP] | m_bitboards[attackerColor][QUEEN])) return true;
-    if (getRookAttacks(sq, occupied) & (m_bitboards[attackerColor][ROOK] | m_bitboards[attackerColor][QUEEN])) return true;
+    uint64_t occ = m_all_occupancy;
+    if (getBishopAttacks(sq, occ) & (m_bitboards[attackerColor][BISHOP] | m_bitboards[attackerColor][QUEEN])) return true;
+    if (getRookAttacks(sq, occ) & (m_bitboards[attackerColor][ROOK] | m_bitboards[attackerColor][QUEEN])) return true;
 
     return false;
 }
@@ -189,16 +248,17 @@ bool Board::MakeMove(Move move) {
     MoveFlag flags = move.getFlags();
     Color player = m_side_to_move;
     Color enemy = (player == WHITE) ? BLACK : WHITE;
-    PieceType piece = getPieceAt(from_sq, player);
+    PieceType piece = move.getPieceType();
 
     BoardState newBoardState;
     newBoardState.captured_piece_type = PIECE_NONE;
     newBoardState.en_passant_sq = SQUARE_NONE;
-    newBoardState.castling_rights = getCastlingRights();
-    newBoardState.half_move_clock = getHalfMoveClock() + 1;
-    newBoardState.full_move_number = getFullMoveNumber() + (player == BLACK ? 1 : 0);
+    newBoardState.castling_rights = boardStateHistory[m_ply].castling_rights;
+    newBoardState.half_move_clock = boardStateHistory[m_ply].half_move_clock + 1;
+    newBoardState.full_move_number = boardStateHistory[m_ply].full_move_number + (player == BLACK ? 1 : 0);
 
-    if (flags & CAPTURE) {
+    if (flags & CAPTURE_FLAG) {
+        newBoardState.half_move_clock = 0;
         if (flags == EN_PASSANT) {
             Square cap_sq = (player == WHITE) ? (Square)(to_sq - 8) : (Square)(to_sq + 8);
             newBoardState.captured_piece_type = PAWN;
@@ -206,90 +266,67 @@ bool Board::MakeMove(Move move) {
             m_side_occupancy[enemy] ^= (1ULL << cap_sq);
         }
         else {
-            PieceType captured = getPieceAt(to_sq, enemy);
+            PieceType captured = getPieceAt(to_sq, enemy);;
             newBoardState.captured_piece_type = captured;
             m_bitboards[enemy][captured] ^= (1ULL << to_sq);
             m_side_occupancy[enemy] ^= (1ULL << to_sq);
         }
-        newBoardState.half_move_clock = 0;
     }
 
     if (piece == PAWN) newBoardState.half_move_clock = 0;
 
-    bool is_promotion = false;
+    bool is_promotion = (flags & PROMOTION_FLAG);
 
-    switch (flags) {
-        case DOUBLE_PAWN_PUSH:
+    if (is_promotion) {
+        m_bitboards[player][PAWN] ^= (1ULL << from_sq);
+        m_side_occupancy[player] ^= (1ULL << from_sq);
+
+        PieceType prom_piece;
+
+        uint8_t promType = flags & 0b0011;
+        if (promType == 0b0011) prom_piece = QUEEN;
+        else if (promType == 0b0010) prom_piece = ROOK;
+        else if (promType == 0b0001) prom_piece = BISHOP;
+        else prom_piece = KNIGHT;
+
+        m_bitboards[player][prom_piece] ^= (1ULL << to_sq);
+        m_side_occupancy[player] ^= (1ULL << to_sq);
+    }
+    else {
+        m_bitboards[player][piece] ^= (1ULL << from_sq) | (1ULL << to_sq);
+        m_side_occupancy[player] ^= (1ULL << from_sq) | (1ULL << to_sq);
+
+        if (flags == DOUBLE_PAWN_PUSH) {
             newBoardState.en_passant_sq = (player == WHITE) ? (Square)(from_sq + 8) : (Square)(from_sq - 8);
-            break;
-
-        case KINGSIDE_CASTLE: {
+        }
+        else if (flags == KINGSIDE_CASTLE) {
             Square r_from = (player == WHITE) ? H1 : H8;
             Square r_to = (player == WHITE) ? F1 : F8;
             m_bitboards[player][ROOK] ^= (1ULL << r_from) | (1ULL << r_to);
             m_side_occupancy[player] ^= (1ULL << r_from) | (1ULL << r_to);
-            newBoardState.castling_rights &= (player == WHITE ? ~WHITE_ALL_CASTLE_RIGHTS : ~BLACK_ALL_CASTLE_RIGHTS);
-            break;
         }
-        case QUEENSIDE_CASTLE: {
+        else if (flags == QUEENSIDE_CASTLE) {
             Square r_from = (player == WHITE) ? A1 : A8;
             Square r_to = (player == WHITE) ? D1 : D8;
             m_bitboards[player][ROOK] ^= (1ULL << r_from) | (1ULL << r_to);
             m_side_occupancy[player] ^= (1ULL << r_from) | (1ULL << r_to);
-            newBoardState.castling_rights &= (player == WHITE ? ~WHITE_ALL_CASTLE_RIGHTS : ~BLACK_ALL_CASTLE_RIGHTS);
-            break;
         }
-        case EN_PASSANT: {
-            Square cap_sq = (Square)((player == WHITE) ? (to_sq - 8) : (to_sq + 8));
-            m_bitboards[enemy][PAWN] ^= (1ULL << cap_sq);
-            m_side_occupancy[enemy] ^= (1ULL << cap_sq);
-            newBoardState.captured_piece_type = PAWN;
-            break;
-        }
-
-        case PROMOTION_TYPE_QUEEN:
-        case PROMOTION_TYPE_ROOK:
-        case PROMOTION_TYPE_BISHOP:
-        case PROMOTION_TYPE_KNIGHT: {
-            is_promotion = true;
-            PieceType prom_piece;
-            if (flags == PROMOTION_TYPE_QUEEN) prom_piece = QUEEN;
-            else if (flags == PROMOTION_TYPE_ROOK) prom_piece = ROOK;
-            else if (flags == PROMOTION_TYPE_BISHOP) prom_piece = BISHOP;
-            else prom_piece = KNIGHT;
-
-
-            m_bitboards[player][PAWN] ^= (1ULL << from_sq);
-            m_bitboards[player][prom_piece] ^= (1ULL << to_sq);
-            m_side_occupancy[player] ^= (1ULL << from_sq) | (1ULL << to_sq);
-            break;
-        }
-    }
-
-    if (!is_promotion) {
-        m_bitboards[player][piece] ^= (1ULL << from_sq) | (1ULL << to_sq);
-        m_side_occupancy[player] ^= (1ULL << from_sq) | (1ULL << to_sq);
     }
 
     if (piece == KING) {
         newBoardState.castling_rights &= (player == WHITE ? ~WHITE_ALL_CASTLE_RIGHTS : ~BLACK_ALL_CASTLE_RIGHTS);
     }
-    if (from_sq == A1) newBoardState.castling_rights &= ~WHITE_QUEENSIDE_CASTLE;
-    if (from_sq == H1) newBoardState.castling_rights &= ~WHITE_KINGSIDE_CASTLE;
-    if (from_sq == A8) newBoardState.castling_rights &= ~BLACK_QUEENSIDE_CASTLE;
-    if (from_sq == H8) newBoardState.castling_rights &= ~BLACK_KINGSIDE_CASTLE;
+
+    newBoardState.castling_rights &= castling_mask[from_sq];
+    newBoardState.castling_rights &= castling_mask[to_sq];
 
     m_all_occupancy = m_side_occupancy[WHITE] | m_side_occupancy[BLACK];
-
     m_ply++;
     boardStateHistory[m_ply] = newBoardState;
     m_side_to_move = enemy;
 
-    uint64_t kingBB = m_bitboards[player][KING];
-    Square kingSq = (Square)GetLSB(kingBB);
-
+    Square kingSq = (Square)GetLSB(m_bitboards[player][KING]);
     if (isSquareAttacked(kingSq, enemy)) {
-
         UndoMove(move);
         return false;
     }
@@ -301,6 +338,7 @@ void Board::UndoMove(Move move) {
     Square from_sq = move.getFrom();
     Square to_sq = move.getTo();
     MoveFlag flags = move.getFlags();
+    PieceType piece_type = move.getPieceType();
 
     BoardState& state_to_undo = boardStateHistory[m_ply];
     PieceType captured = (PieceType)state_to_undo.captured_piece_type;
@@ -309,19 +347,32 @@ void Board::UndoMove(Move move) {
     Color player = m_side_to_move;
     Color enemy = (player == WHITE) ? BLACK : WHITE;
 
-    if (flags & (PROMOTION_TYPE_QUEEN | PROMOTION_TYPE_ROOK | PROMOTION_TYPE_BISHOP | PROMOTION_TYPE_KNIGHT)) {
-        PieceType prom_piece = getPieceAt(to_sq, player);
-        m_bitboards[player][prom_piece] ^= (1ULL << to_sq);
+    if (flags & PROMOTION_FLAG) {
+
+        m_bitboards[player][piece_type] ^= (1ULL << to_sq);
         m_bitboards[player][PAWN] ^= (1ULL << from_sq);
         m_side_occupancy[player] ^= (1ULL << from_sq) | (1ULL << to_sq);
     }
+
     else {
-        PieceType piece = getPieceAt(to_sq, player);
-        m_bitboards[player][piece] ^= (1ULL << to_sq) | (1ULL << from_sq);
+        m_bitboards[player][piece_type] ^= (1ULL << to_sq) | (1ULL << from_sq);
         m_side_occupancy[player] ^= (1ULL << to_sq) | (1ULL << from_sq);
+
+        if (flags == KINGSIDE_CASTLE) {
+            Square r_from = (player == WHITE) ? H1 : H8;
+            Square r_to = (player == WHITE) ? F1 : F8;
+            m_bitboards[player][ROOK] ^= (1ULL << r_from) | (1ULL << r_to);
+            m_side_occupancy[player] ^= (1ULL << r_from) | (1ULL << r_to);
+        }
+        else if (flags == QUEENSIDE_CASTLE) {
+            Square r_from = (player == WHITE) ? A1 : A8;
+            Square r_to = (player == WHITE) ? D1 : D8;
+            m_bitboards[player][ROOK] ^= (1ULL << r_from) | (1ULL << r_to);
+            m_side_occupancy[player] ^= (1ULL << r_from) | (1ULL << r_to);
+        }
     }
 
-    if (flags & CAPTURE) {
+    if (flags & CAPTURE_FLAG) {
         if (flags == EN_PASSANT) {
             Square cap_sq = (player == WHITE) ? (Square)(to_sq - 8) : (Square)(to_sq + 8);
             m_bitboards[enemy][PAWN] ^= (1ULL << cap_sq);
@@ -333,30 +384,30 @@ void Board::UndoMove(Move move) {
         }
     }
 
-    if (flags == KINGSIDE_CASTLE) {
-        Square r_from = (player == WHITE) ? H1 : H8;
-        Square r_to = (player == WHITE) ? F1 : F8;
-        m_bitboards[player][ROOK] ^= (1ULL << r_from) | (1ULL << r_to);
-        m_side_occupancy[player] ^= (1ULL << r_from) | (1ULL << r_to);
-    }
-    else if (flags == QUEENSIDE_CASTLE) {
-        Square r_from = (player == WHITE) ? A1 : A8;
-        Square r_to = (player == WHITE) ? D1 : D8;
-        m_bitboards[player][ROOK] ^= (1ULL << r_from) | (1ULL << r_to);
-        m_side_occupancy[player] ^= (1ULL << r_from) | (1ULL << r_to);
-    }
-
     m_all_occupancy = m_side_occupancy[WHITE] | m_side_occupancy[BLACK];
     m_ply--;
 }
 
-uint64_t Board::Perft(int depth, bool useBulk) {
+uint64_t Board::PerftDivide(int depth) {
+    std::vector<Move> moves = MoveGenerator::GenerateMoves(*this);
+    uint64_t total_nodes = 0;
+    for (const Move& move : moves) {
+        if (!MakeMove(move)) {
+            continue;
+        }
+        uint64_t nodes = Perft(depth - 1);
+        std::cout << square_to_coordinates[(int)move.getFrom()] << " -> " << square_to_coordinates[(int)move.getTo()] << ": " << nodes << std::endl;
+        total_nodes += nodes;
+
+        UndoMove(move);
+    }
+    return total_nodes;
+}
+
+uint64_t Board::Perft(int depth) {
     if (depth == 0) return 1ULL;
 
     std::vector<Move> moves = MoveGenerator::GenerateMoves(*this);
-    if (useBulk && depth == 1) {
-        return (uint64_t)moves.size();
-    }
 
     uint64_t nodes = 0;
 
@@ -365,7 +416,7 @@ uint64_t Board::Perft(int depth, bool useBulk) {
             continue;
         }
 
-        nodes += Perft(depth - 1, useBulk);
+        nodes += Perft(depth - 1);
 
         UndoMove(move);
     }

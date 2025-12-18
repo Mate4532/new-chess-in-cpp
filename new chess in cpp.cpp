@@ -8,13 +8,13 @@
 int main() {
     Attacks::InitAll();
     Board board;
-    int perftDepth = 5;
+    int perftDepth = 6;
 
     std::cout << "Perft(" << perftDepth << ") inditasa..." << std::endl;
 
     auto start = std::chrono::high_resolution_clock::now();
 
-    uint64_t nodes = board.Perft(perftDepth, false);
+    uint64_t nodes = board.Perft(perftDepth);
 
     auto end = std::chrono::high_resolution_clock::now();
 
