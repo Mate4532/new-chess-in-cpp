@@ -29,4 +29,20 @@ public:
     inline PieceType getPieceType() const {
         return (PieceType)m_piece_type;
     }
+
+    inline uint16_t getMoveData() const {
+        return m_move_data;
+	}
+
+    std::string toAlgebraic() const {
+        return square_to_coordinates[getFrom()] + square_to_coordinates[getTo()];
+    }
+
+    PieceType getPromotionPieceType() const {
+
+        if (!(getFlags() & PROMOTION_FLAG)) return PIECE_NONE;
+
+        return static_cast<PieceType>((getFlags() & 0b0011) + 1);
+    }
+
 };

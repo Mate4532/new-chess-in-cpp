@@ -1,3 +1,12 @@
 ﻿  Board.cpp
-D:\projects\Visual Studio projects\new-chess-in-cpp\Board.cpp(308,23): warning C4834: discarding return value of function with [[nodiscard]] attribute
+  BoardManager.cpp
+  Evaluation.cpp
+  MoveGenerator.cpp
+  MoveOrdering.cpp
+  new chess in cpp.cpp
+  Searcher.cpp
+  TranspositionTable.cpp
+  UCIParsing.cpp
+  Zobrist.cpp
+  Generating Code...
   new chess in cpp.vcxproj -> D:\projects\Visual Studio projects\new-chess-in-cpp\x64\Debug\new chess in cpp.exe
