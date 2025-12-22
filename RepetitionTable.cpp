@@ -5,10 +5,8 @@ void RepetitionTable::Init(const Board& board) {
     count = 0;
 
     for (int i = 0; i <= board.getPly(); i++) {
-        uint64_t hash = board.getHash();
-
-        bool reset = (board.getHalfMoveClock() == 0);
-
+        uint64_t hash = board.getHash(i);
+        bool reset = (board.getHalfMoveClock(i) == 0);
         Push(hash, reset);
     }
 }

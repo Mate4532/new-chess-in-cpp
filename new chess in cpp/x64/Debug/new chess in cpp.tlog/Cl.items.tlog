@@ -5,6 +5,8 @@ D:\projects\Visual Studio projects\new-chess-in-cpp\Evaluation.cpp;D:\projects\V
 D:\projects\Visual Studio projects\new-chess-in-cpp\MoveGenerator.cpp;D:\projects\Visual Studio projects\new-chess-in-cpp\new chess in cpp\x64\Debug\MoveGenerator.obj
 D:\projects\Visual Studio projects\new-chess-in-cpp\MoveOrdering.cpp;D:\projects\Visual Studio projects\new-chess-in-cpp\new chess in cpp\x64\Debug\MoveOrdering.obj
 D:\projects\Visual Studio projects\new-chess-in-cpp\new chess in cpp.cpp;D:\projects\Visual Studio projects\new-chess-in-cpp\new chess in cpp\x64\Debug\new chess in cpp.obj
+D:\projects\Visual Studio projects\new-chess-in-cpp\PrecomputedEvaluationData.cpp;D:\projects\Visual Studio projects\new-chess-in-cpp\new chess in cpp\x64\Debug\PrecomputedEvaluationData.obj
+D:\projects\Visual Studio projects\new-chess-in-cpp\RepetitionTable.cpp;D:\projects\Visual Studio projects\new-chess-in-cpp\new chess in cpp\x64\Debug\RepetitionTable.obj
 D:\projects\Visual Studio projects\new-chess-in-cpp\Searcher.cpp;D:\projects\Visual Studio projects\new-chess-in-cpp\new chess in cpp\x64\Debug\Searcher.obj
 D:\projects\Visual Studio projects\new-chess-in-cpp\TranspositionTable.cpp;D:\projects\Visual Studio projects\new-chess-in-cpp\new chess in cpp\x64\Debug\TranspositionTable.obj
 D:\projects\Visual Studio projects\new-chess-in-cpp\UCIParsing.cpp;D:\projects\Visual Studio projects\new-chess-in-cpp\new chess in cpp\x64\Debug\UCIParsing.obj

@@ -8,7 +8,7 @@
 
 class Searcher {
 private:
-    Board& m_board;
+    Board& board;
     TranspositionTable tt;
 
     int negamax(int depth, int alpha, int beta, int ply);
@@ -18,7 +18,8 @@ private:
     const int robot_thinking_time_ms = 3000;
 
     long long startTime = 0;
-    bool stopSearch = false;
+    std::atomic<bool> stop;
+    std::atomic<uint64_t> nodes;
 
     int historyMoves[2][64][64];
     Move killerMoves[2][64];
@@ -29,7 +30,7 @@ private:
     void AgeHistory();
 
 public:
-    Searcher(Board& board) : m_board(board), tt(64) { 
+    Searcher(Board& board) : board(board), tt(64) { 
         ClearHistory(); 
         PrecomputedEvaluationData::Init();
     }

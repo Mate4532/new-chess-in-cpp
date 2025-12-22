@@ -1,46 +1,62 @@
 #include "TranspositionTable.h"
 
 TranspositionTable::TranspositionTable(size_t mb) {
-
     size_t entryCount = (mb * 1024 * 1024) / sizeof(TTEntry);
-    table.resize(entryCount, { 0, 0, 0, EXACT, Move() });
+    table.resize(entryCount);
+    Clear();
 }
 
 void TranspositionTable::Store(uint64_t hash, int score, int depth, TTFlag flag, Move bestMove) {
-    size_t index = hash % table.size();
+    size_t index = (hash ^ (hash >> 32)) % table.size();
+    TTEntry& e = table[index];
 
-    if (table[index].hash == 0 || table[index].depth <= depth) {
-        table[index] = { hash, score, depth, flag, bestMove };
+    if (e.hash == 0 ||
+        e.depth < depth ||
+        (e.depth == depth && flag == EXACT)) {
+        e.hash = hash;
+        e.score = score;
+        e.depth = depth;
+        e.flag = flag;
+        e.bestMove = bestMove;
     }
 }
 
 bool TranspositionTable::Probe(uint64_t hash, int depth, int alpha, int beta, int& score, Move& bestMove) {
-    size_t index = hash % table.size();
-    TTEntry& entry = table[index];
+    size_t index = (hash ^ (hash >> 32)) % table.size();
+    TTEntry& e = table[index];
 
-    if (entry.hash == hash) {
-        bestMove = entry.bestMove;
+    if (e.hash != hash)
+        return false;
 
-        if (entry.depth >= depth) {
-            if (entry.flag == EXACT) {
-                score = entry.score;
-                return true;
-            }
+    bestMove = e.bestMove;
 
-            if (entry.flag == ALPHA && entry.score <= alpha) {
-                score = alpha;
-                return true;
-            }
+    if (e.depth < depth)
+        return false;
 
-            if (entry.flag == BETA && entry.score >= beta) {
-                score = beta;
-                return true;
-            }
-        }
+    if (e.flag == EXACT) {
+        score = e.score;
+        return true;
     }
+
+    if (e.flag == ALPHA && e.score <= alpha) {
+        score = e.score;
+        return true;
+    }
+
+    if (e.flag == BETA && e.score >= beta) {
+        score = e.score;
+        return true;
+    }
+
     return false;
 }
 
 void TranspositionTable::Clear() {
-    for (auto& entry : table) entry.hash = 0;
+    for (auto& e : table) {
+        e.hash = 0;
+        e.depth = 0;
+        e.flag = EXACT;
+        e.score = 0;
+        e.bestMove = Move();
+    }
 }

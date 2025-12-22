@@ -1,9 +1,12 @@
-﻿  Board.cpp
+﻿  Attacks.cpp
+  Board.cpp
   BoardManager.cpp
   Evaluation.cpp
   MoveGenerator.cpp
   MoveOrdering.cpp
   new chess in cpp.cpp
+  PrecomputedEvaluationData.cpp
+  RepetitionTable.cpp
   Searcher.cpp
   TranspositionTable.cpp
   UCIParsing.cpp

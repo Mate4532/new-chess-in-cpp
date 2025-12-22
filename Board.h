@@ -99,14 +99,14 @@ public:
     inline PieceType getCapturePieceType() const{
         return (PieceType)boardStateHistory[m_ply].captured_piece_type;
     }
-    inline uint8_t getHalfMoveClock() const {
-        return boardStateHistory[m_ply].half_move_clock;
+    inline uint8_t getHalfMoveClock(int i = -1) const {
+        return boardStateHistory[i == -1 ? m_ply : i].half_move_clock;
     }
     inline uint16_t getFullMoveNumber() const {
         return boardStateHistory[m_ply].full_move_number;
     }
-    inline uint64_t getHash() const {
-        return boardStateHistory[m_ply].zobrist_hash;
+    inline uint64_t getHash(int i = -1) const {
+        return boardStateHistory[i == -1 ? m_ply : i].zobrist_hash;
     }
     inline uint16_t getPly() const {
         return m_ply;

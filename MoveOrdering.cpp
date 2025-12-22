@@ -1,54 +1,79 @@
 #include "MoveOrdering.h"
+#include "Evaluation.h"
 
-void MoveOrdering::SortMoves(const Board& board, MoveList& moves, Move ttMove,
-    Move killer1, Move killer2, const int history[2][64][64]) {
-    if (moves.size() <= 1) return;
-
-    int scores[256] = { 0 };
+static inline int ScoreMove(
+    const Board& board,
+    const Move& m,
+    const Move& ttMove,
+    const Move& killer1,
+    const Move& killer2,
+    const int history[2][64][64]
+) {
     Color us = board.getSideToMove();
     Color enemy = (Color)(us ^ 1);
 
-    for (int i = 0; i < (int)moves.size(); i++) {
-        const Move& m = moves[i];
-        int score = 0;
+    if (m.getFrom() == ttMove.getFrom() &&
+        m.getTo() == ttMove.getTo() &&
+        m.getFlags() == ttMove.getFlags())
+        return 10'000'000;
 
-        if (m.getFrom() == ttMove.getFrom() && m.getTo() == ttMove.getTo() && m.getFlags() == ttMove.getFlags()) {
-            score = 1000000;
-        }
-        else if (m.getFlags() & CAPTURE_FLAG) {
-            PieceType attacker = m.getPieceType();
-            PieceType victim = board.getPieceAt(m.getTo(), enemy);
-            if (m.getFlags() == EN_PASSANT) victim = PAWN;
+    if (m.getFlags() & CAPTURE_FLAG) {
+        PieceType victim =
+            (m.getFlags() == EN_PASSANT)
+            ? PAWN
+            : board.getPieceAt(m.getTo(), enemy);
 
-            score = 900000 + (Evaluation::GetPieceValue(victim) * 10) - Evaluation::GetPieceValue(attacker);
-        }
-
-        else if (m.getFlags() & PROMOTION_FLAG) {
-            MoveFlag prom = (MoveFlag)(m.getFlags() & 0b0011);
-            if (prom == PROMOTION_TYPE_QUEEN) score = 850000;
-            else score = 300000;
-        }
-
-        else if (m.getFrom() == killer1.getFrom() && m.getTo() == killer1.getTo()) {
-            score = 800000;
-        }
-        else if (m.getFrom() == killer2.getFrom() && m.getTo() == killer2.getTo()) {
-            score = 700000;
-        }
-
-        else {
-            score = history[us][m.getFrom()][m.getTo()];
-        }
-
-        scores[i] = score;
+        int v = Evaluation::GetPieceValue(victim);
+        int a = Evaluation::GetPieceValue(m.getPieceType());
+        return 5'000'000 + v * 16 - a;
     }
 
-    for (int i = 0; i < (int)moves.size() - 1; i++) {
-        int bestIdx = i;
-        for (int j = i + 1; j < (int)moves.size(); j++) {
-            if (scores[j] > scores[bestIdx]) bestIdx = j;
+    if (m.getFlags() & PROMOTION_FLAG) {
+        if ((m.getFlags() & 0b0011) == PROMOTION_TYPE_QUEEN)
+            return 4'000'000;
+        return 3'000'000;
+    }
+
+    if (m.getFrom() == killer1.getFrom() && m.getTo() == killer1.getTo())
+        return 2'000'000;
+
+    if (m.getFrom() == killer2.getFrom() && m.getTo() == killer2.getTo())
+        return 1'500'000;
+
+    return history[us][m.getFrom()][m.getTo()];
+}
+
+void MoveOrdering::SortMoves(
+    const Board& board,
+    MoveList& moves,
+    Move ttMove,
+    Move killer1,
+    Move killer2,
+    const int history[2][64][64]
+) {
+    int scores[256];
+
+    int n = (int)moves.size();
+    for (int i = 0; i < n; i++) {
+        scores[i] = ScoreMove(
+            board,
+            moves[i],
+            ttMove,
+            killer1,
+            killer2,
+            history
+        );
+    }
+
+    for (int i = 0; i < n - 1; i++) {
+        int best = i;
+        for (int j = i + 1; j < n; j++) {
+            if (scores[j] > scores[best])
+                best = j;
         }
-        std::swap(scores[i], scores[bestIdx]);
-        std::swap(moves[i], moves[bestIdx]);
+        if (best != i) {
+            std::swap(scores[i], scores[best]);
+            std::swap(moves[i], moves[best]);
+        }
     }
 }
