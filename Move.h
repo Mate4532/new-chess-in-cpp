@@ -38,6 +38,10 @@ public:
         return square_to_coordinates[getFrom()] + square_to_coordinates[getTo()];
     }
 
+    inline bool isValid() const {
+        return m_move_data != 0;
+	}
+
     PieceType getPromotionPieceType() const {
 
         if (!(getFlags() & PROMOTION_FLAG)) return PIECE_NONE;

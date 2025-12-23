@@ -2,14 +2,14 @@
 #include "Board.h"
 #include "MoveList.h"
 
+#define MAX_KILLER_HISTORY 64
+
 class MoveOrdering {
 public:
     static void SortMoves(
         const Board& board,
         MoveList& moves,
         Move ttMove,
-        Move killer1,
-        Move killer2,
-        const int history[2][64][64]
+        const int history[2][MAX_KILLER_HISTORY][MAX_KILLER_HISTORY]
     );
 };

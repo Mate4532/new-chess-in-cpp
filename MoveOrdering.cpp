@@ -5,9 +5,7 @@ static inline int ScoreMove(
     const Board& board,
     const Move& m,
     const Move& ttMove,
-    const Move& killer1,
-    const Move& killer2,
-    const int history[2][64][64]
+    const int history[2][MAX_KILLER_HISTORY][MAX_KILLER_HISTORY]
 ) {
     Color us = board.getSideToMove();
     Color enemy = (Color)(us ^ 1);
@@ -34,12 +32,6 @@ static inline int ScoreMove(
         return 3'000'000;
     }
 
-    if (m.getFrom() == killer1.getFrom() && m.getTo() == killer1.getTo())
-        return 2'000'000;
-
-    if (m.getFrom() == killer2.getFrom() && m.getTo() == killer2.getTo())
-        return 1'500'000;
-
     return history[us][m.getFrom()][m.getTo()];
 }
 
@@ -47,9 +39,7 @@ void MoveOrdering::SortMoves(
     const Board& board,
     MoveList& moves,
     Move ttMove,
-    Move killer1,
-    Move killer2,
-    const int history[2][64][64]
+    const int history[2][MAX_KILLER_HISTORY][MAX_KILLER_HISTORY]
 ) {
     int scores[256];
 
@@ -59,8 +49,6 @@ void MoveOrdering::SortMoves(
             board,
             moves[i],
             ttMove,
-            killer1,
-            killer2,
             history
         );
     }

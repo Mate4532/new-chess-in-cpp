@@ -94,8 +94,11 @@ public:
     static int GetPieceValue(PieceType p);
 	static int EvaluatePos(const Board& board);
     static int EvaluatePawns(const Board& board, Color color);
-    static int KingPawnShield(const Board& board, Color color, float eg, int enemyPst);
+    static int EvaluatePawnCenter(const Board& board, Color color);
+    static int MaterialImbalancePenalty(PieceType lost, int pawnsGained, float egT);
+    static int KingPawnShield(const Board& board, Color color, float egT);
     static int RookBlockPenalty(const Board& board, Color color);
     static int MopUpEval(const Board& board, Color winner, float endgameT);
     static int EvaluateKingSafety(const Board& board, Color color);
+    static int EvaluatePawnTerritory(const Board& board, Color color);
 };

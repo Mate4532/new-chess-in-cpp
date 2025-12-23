@@ -8,15 +8,17 @@ inline long long now_ms() {
         std::chrono::steady_clock::now().time_since_epoch()).count();
 }
 
-inline int ScoreToTT(int score, int ply) {
-    if (score > 90000) return score + ply;
-    if (score < -90000) return score - ply;
+inline int Searcher::ScoreToTT(int score, int ply) {
+    if (IsMateScore(score)) {
+        return score > 0 ? score + ply : score - ply;
+    }
     return score;
 }
 
-inline int ScoreFromTT(int score, int ply) {
-    if (score > 90000) return score - ply;
-    if (score < -90000) return score + ply;
+inline int Searcher::ScoreFromTT(int score, int ply) {
+    if (IsMateScore(score)) {
+        return score > 0 ? score - ply : score + ply;
+    }
     return score;
 }
 
@@ -33,7 +35,7 @@ int Searcher::quiescence(int alpha, int beta) {
     MoveList moves;
     MoveGenerator::GenerateMoves(board, moves, true);
 
-    MoveOrdering::SortMoves(board, moves, Move(), Move(), Move(), historyMoves);
+    MoveOrdering::SortMoves(board, moves, Move(), historyMoves);
 
     for (const Move& m : moves) {
         if (!board.MakeMove(m)) continue;
@@ -49,9 +51,6 @@ int Searcher::quiescence(int alpha, int beta) {
 
 int Searcher::negamax(int depth, int alpha, int beta, int ply) {
 
-    if (ply >= MAX_PLY)
-        return Evaluation::EvaluatePos(board);
-
     nodes++;
     if ((nodes & 2047) == 0 && now_ms() - startTime >= robot_thinking_time_ms)
         stop = true;
@@ -64,35 +63,42 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply) {
     int ttScore;
     Move ttMove;
 
-    if (tt.Probe(hash, depth, alpha, beta, ttScore, ttMove)) {
-        return ScoreFromTT(ttScore, ply);
-    }
-
-    if (ply > 0 && !board.isSquareAttacked(
-        board.getKingSquare(board.getSideToMove()),
-        (Color)(board.getSideToMove() ^ 1)))
-    {
-        if (board.IsRepetition())
-            return 0;
-    }
-
     bool inCheck = board.isSquareAttacked(
         board.getKingSquare(board.getSideToMove()),
         (Color)(board.getSideToMove() ^ 1));
 
+    if (ply > 0 && !inCheck && board.IsRepetition()) {
+        return 0;
+    }
+
     if (inCheck)
         depth++;
+
+    if (tt.Probe(hash, depth, alpha, beta, ttScore, ttMove)) {
+        return ScoreFromTT(ttScore, ply);
+    }
 
     if (depth <= 0)
         return quiescence(alpha, beta);
 
     if (depth >= 3 && !inCheck && ply > 0) {
-        uint64_t nonPawns =
-            board.getSideOccupancy(board.getSideToMove()) ^
-            board.getPieceBitboard(board.getSideToMove(), PAWN) ^
-            board.getPieceBitboard(board.getSideToMove(), KING);
 
-        if (nonPawns) {
+        Color us = board.getSideToMove();
+
+        bool hasBigPiece =
+            board.getPieceBitboard(us, QUEEN) ||
+            board.getPieceBitboard(us, ROOK);
+
+        bool hasMinor =
+            board.getPieceBitboard(us, BISHOP) ||
+            board.getPieceBitboard(us, KNIGHT);
+
+        bool zugzwangRisk =
+            !hasBigPiece &&
+            board.getPieceBitboard(us, PAWN);
+
+        if ((hasBigPiece || hasMinor) && !zugzwangRisk) {
+
             board.MakeNullMove();
             int r = 2 + depth / 6;
             int score = -negamax(depth - 1 - r, -beta, -beta + 1, ply + 1);
@@ -106,14 +112,15 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply) {
     MoveList moves;
     MoveGenerator::GenerateMoves(board, moves);
 
-    MoveOrdering::SortMoves(
-        board,
-        moves,
-        ttMove,
-        killerMoves[0][ply],
-        killerMoves[1][ply],
-        historyMoves
-    );
+    if (ply < MAX_KILLER_HISTORY) {
+
+        MoveOrdering::SortMoves(
+            board,
+            moves,
+            ttMove,
+            historyMoves
+        );
+    }
 
     Move bestMove;
     int legalMoves = 0;
@@ -130,7 +137,7 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply) {
             !(m.getFlags() & PROMOTION_FLAG);
 
         if (depth >= 3 && legalMoves > 3 && quiet && !inCheck) {
-            score = -negamax(depth - 2, -alpha - 1, -alpha, ply + 1);
+            score = -negamax(depth - 3, -alpha - 1, -alpha, ply + 1);
             if (score > alpha)
                 score = -negamax(depth - 1, -beta, -alpha, ply + 1);
         }
@@ -142,10 +149,8 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply) {
         if (stop)
             return alpha;
 
-        if (score >= beta) {
+        if (score >= beta && ply < MAX_KILLER_HISTORY) {
             if (quiet) {
-                killerMoves[1][ply] = killerMoves[0][ply];
-                killerMoves[0][ply] = m;
                 historyMoves[board.getSideToMove()][m.getFrom()][m.getTo()] += depth * depth;
             }
             tt.Store(hash, ScoreToTT(beta, ply), depth, BETA, m);
@@ -159,9 +164,17 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply) {
     }
 
     if (legalMoves == 0) {
-        if (inCheck)
-            return -MATE_SCORE + ply;
-        return 0;
+        int score = inCheck ? -MATE_SCORE + ply : 0;
+
+        tt.Store(
+            hash,
+            ScoreToTT(score, ply),
+            depth,
+            EXACT,
+            Move()
+        );
+
+        return score;
     }
 
     TTFlag flag = (alpha <= originalAlpha) ? ALPHA : EXACT;
@@ -216,10 +229,19 @@ Move Searcher::IterativeDeepening() {
             window *= 2;
         }
 
+        int rawScore;
+        Move tmpMove;
+        if (tt.Probe(board.getHash(), depth, -MATE_SCORE, MATE_SCORE, rawScore, tmpMove)) {
+            score = ScoreFromTT(rawScore, 0);
+        }
+
+        if (tmpMove.isValid()) {
+            bestMove = tmpMove;
+        }
+        
         if (stop) break;
 
         lastScore = score;
-        tt.Probe(board.getHash(), depth, -MATE_SCORE, MATE_SCORE, score, bestMove);
 
         std::cout << "info depth " << depth << " score ";
         if (abs(score) > 90000)

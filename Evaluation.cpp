@@ -17,6 +17,11 @@ static const int rookWeight = 20;
 static const int queenWeight = 45;
 static const int endgameStart = 2 * knightWeight + 2 * bishopWeight + 2 * rookWeight + queenWeight;
 
+static const uint64_t CENTER_4 = (1ULL << D4) | (1ULL << E4) | (1ULL << D5) | (1ULL << E5);
+static const uint64_t CENTER_16 =
+    (RANK_3 | RANK_4 | RANK_5 | RANK_6) &
+    (FILE_C | FILE_D | FILE_E | FILE_F);
+
 int Evaluation::GetPieceValue(PieceType p) {
     switch (p) {
     case PAWN:   return 100;
@@ -27,6 +32,59 @@ int Evaluation::GetPieceValue(PieceType p) {
     case KING:   return 10000;
     default:     return 0;
     }
+}
+
+int Evaluation::EvaluatePawnTerritory(const Board& board, Color color) {
+    uint64_t pawns = board.getPieceBitboard(color, PAWN);
+    int bonus = 0;
+
+    while (pawns) {
+        Square sq = PopBit(pawns);
+        int rank = sq >> 3;
+        int file = sq & 7;
+
+        uint64_t myDefenders = board.getPawnAttacks(sq, (Color)(color ^ 1));
+        if (myDefenders & board.getPieceBitboard(color, PAWN))
+            bonus += 6;
+
+        bool inEnemyTerritory = (color == WHITE) ? (rank >= 4) : (rank <= 3);
+        if (!inEnemyTerritory) continue;
+
+        bonus += 8;
+        if (file >= 2 && file <= 5) bonus += 4;
+
+        uint64_t attacks = board.getPawnAttacks(sq, color);
+        uint64_t enemyTerritoryMask = (color == WHITE) ? 0xFFFF000000000000ULL : 0x000000000000FFFFULL;
+
+        int controlledCount = std::popcount(attacks & enemyTerritoryMask);
+        bonus += std::min(controlledCount * 2, 6);
+    }
+    return bonus;
+}
+
+int Evaluation::MaterialImbalancePenalty(PieceType lost, int pawnsGained, float egT) {
+    if (lost == KNIGHT || lost == BISHOP) {
+
+        if (pawnsGained >= 3) {
+            float mgWeight = 1.0f - egT;
+
+            int penalty = 60;
+
+            return -(int)(penalty * mgWeight);
+        }
+    }
+
+    return 0;
+}
+
+int Evaluation::EvaluatePawnCenter(const Board& board, Color color) {
+    uint64_t pawns = board.getPieceBitboard(color, PAWN);
+    int score = 0;
+
+    score += 12 * std::popcount(pawns & CENTER_4);
+    score += 4 * std::popcount(pawns & CENTER_16);
+
+    return score;
 }
 
 int Evaluation::EvaluatePawns(const Board& board, Color color) {
@@ -71,39 +129,48 @@ int Evaluation::EvaluatePawns(const Board& board, Color color) {
 
 int Evaluation::EvaluateKingSafety(const Board& board, Color color) {
     Color enemy = (Color)(color ^ 1);
+
+    if (board.getPieceBitboard(enemy, QUEEN) == 0 && board.getPieceBitboard(enemy, ROOK) == 0) return 0;
+
     Square kingSq = board.getKingSquare(color);
     uint64_t zone = board.getKingAttacks(kingSq) | (1ULL << kingSq);
-
     int weight = 0;
-    static const int w[] = { 0,2,2,3,5 };
+    const int w[] = { 0, 2, 2, 3, 5, 0 };
 
     for (int pt = KNIGHT; pt <= QUEEN; pt++) {
         uint64_t bb = board.getPieceBitboard(enemy, (PieceType)pt);
         while (bb) {
             Square sq = PopBit(bb);
-            uint64_t attacks =
-                (pt == KNIGHT) ? board.getKnightAttacks(sq) :
+            uint64_t attacks = (pt == KNIGHT) ? board.getKnightAttacks(sq) :
                 (pt == BISHOP) ? board.getBishopAttacks(sq, board.getAllOccupancy()) :
                 (pt == ROOK) ? board.getRookAttacks(sq, board.getAllOccupancy()) :
-                board.getBishopAttacks(sq, board.getAllOccupancy()) |
-                board.getRookAttacks(sq, board.getAllOccupancy());
+                (board.getBishopAttacks(sq, board.getAllOccupancy()) | board.getRookAttacks(sq, board.getAllOccupancy()));
 
-            if (attacks & zone)
-                weight += w[pt];
+            if (attacks & zone) weight += w[pt];
         }
     }
 
-    static const int table[] = {
-        0,0,5,10,20,40,70,100,150,200,300,400,500,600,800
-    };
-
+    static const int table[] = { 0, 0, 10, 20, 40, 80, 130, 190, 260, 350, 460, 580, 720, 900, 1100 };
     return table[std::min(weight, 14)];
 }
 
-int Evaluation::KingPawnShield(const Board& board, Color color, float eg, int enemyPst) {
-    if (eg > 0.8f) return 0;
-    int penalty = enemyPst / 4;
-    return -penalty * (1.0f - eg);
+int Evaluation::KingPawnShield(const Board& board, Color color, float egT) {
+    if (egT > 0.7f) return 0;   
+
+    Square kingSq = board.getKingSquare(color);
+    int kFile = kingSq & 7;
+    uint64_t myPawns = board.getPieceBitboard(color, PAWN);
+    int shieldBonus = 0;
+
+    for (int file = std::max(0, kFile - 1); file <= std::min(7, kFile + 1); file++) {
+        uint64_t fileMask = 0x0101010101010101ULL << file;
+        uint64_t shieldRanks = (color == WHITE) ? (RANK_2 | RANK_3) : (RANK_7 | RANK_6);
+
+        if (myPawns & fileMask & shieldRanks) {
+            shieldBonus += 15;
+        }
+    }
+    return (int)(shieldBonus * (1.0f - egT));
 }
 
 int Evaluation::MopUpEval(const Board& board, Color winner, float eg) {
@@ -117,41 +184,26 @@ int Evaluation::MopUpEval(const Board& board, Color winner, float eg) {
 }
 
 int Evaluation::RookBlockPenalty(const Board& board, Color color) {
-    uint64_t rooks = board.getPieceBitboard(color, ROOK);
     Square kingSq = board.getKingSquare(color);
-
     int kFile = kingSq & 7;
     int kRank = kingSq >> 3;
-
     int penalty = 0;
 
-    while (rooks) {
-        Square rSq = PopBit(rooks);
-        int rFile = rSq & 7;
-        int rRank = rSq >> 3;
+    if (kFile <= 2 || kFile >= 5) {
+        uint64_t rooks = board.getPieceBitboard(color, ROOK);
+        while (rooks) {
+            Square rSq = PopBit(rooks);
+            int rFile = rSq & 7;
 
-        if (rFile != kFile)
-            continue;
+            if ((rFile == 0 && kFile < 3 && kFile > 0) || (rFile == 7 && kFile > 4 && kFile < 7)) {
 
-        bool blocked = false;
-
-        int step = (rRank < kRank) ? 1 : -1;
-        for (int r = rRank + step; r != kRank; r += step) {
-            Square sq = (Square)(r * 8 + rFile);
-            if (board.getAllOccupancy() & (1ULL << sq)) {
-                blocked = false;
-                break;
+                uint64_t attacks = board.getRookAttacks(rSq, board.getAllOccupancy());
+                if (std::popcount(attacks) <= 3) {
+                    penalty += 40;
+                }
             }
-            blocked = true;
-        }
-
-        if (blocked) {
-            penalty += 25;
-            if (std::abs(kRank - rRank) <= 1)
-                penalty += 15;
         }
     }
-
     return -penalty;
 }
 
@@ -161,15 +213,19 @@ int Evaluation::EvaluatePos(const Board& board) {
     int pstOnly[2] = { 0,0 };
     int phase = 0;
 
+    int pieceCounts[2][6] = { {0} };
+
     for (int c = WHITE; c <= BLACK; c++) {
         for (int pt = PAWN; pt <= KING; pt++) {
             uint64_t bb = board.getPieceBitboard((Color)c, (PieceType)pt);
             while (bb) {
                 Square sq = PopBit(bb);
                 int s = (c == WHITE) ? sq : sq ^ 56;
+                pieceCounts[c][pt]++;
 
-                mg[c] += GetPieceValue((PieceType)pt);
-                eg[c] += GetPieceValue((PieceType)pt);
+                int val = GetPieceValue((PieceType)pt);
+                mg[c] += val;
+                eg[c] += val;
 
                 if (pt == KNIGHT) phase += knightWeight;
                 else if (pt == BISHOP) phase += bishopWeight;
@@ -194,24 +250,40 @@ int Evaluation::EvaluatePos(const Board& board) {
     float egT = 1.0f - std::min(1.0f, (float)phase / endgameStart);
 
     for (int c = WHITE; c <= BLACK; c++) {
-        mg[c] += EvaluatePawns(board, (Color)c);
-        eg[c] += EvaluatePawns(board, (Color)c);
+        int opp = c ^ 1;
+
+        if (pieceCounts[opp][KNIGHT] > pieceCounts[c][KNIGHT])
+            mg[c] += MaterialImbalancePenalty(KNIGHT, pieceCounts[c][PAWN] - pieceCounts[opp][PAWN], egT);
+
+        if (pieceCounts[opp][BISHOP] > pieceCounts[c][BISHOP])
+            mg[c] += MaterialImbalancePenalty(BISHOP, pieceCounts[c][PAWN] - pieceCounts[opp][PAWN], egT);
+
+        if (pieceCounts[c][BISHOP] >= 2) {
+            mg[c] += 30;
+            eg[c] += 50;
+        }
+
+        int pScore = EvaluatePawns(board, (Color)c);
+        mg[c] += pScore;
+        eg[c] += pScore;
+
+        mg[c] += EvaluatePawnTerritory(board, (Color)c);
 
         if (egT < 0.6f)
             mg[c] -= EvaluateKingSafety(board, (Color)c);
 
-        mg[c] += KingPawnShield(board, (Color)c, egT, pstOnly[c ^ 1]);
+        mg[c] += KingPawnShield(board, (Color)c, egT);
 
-        if (egT > 0.7f && mg[c] > mg[c ^ 1] + 400)
+        if (egT < 0.7f) mg[c] += EvaluatePawnCenter(board, (Color)c);
+
+        if (egT > 0.7f && mg[c] > mg[opp] + 400)
             eg[c] += MopUpEval(board, (Color)c, egT);
 
-        if (egT > 0.5f) {
-            mg[c] += RookBlockPenalty(board, (Color)c);
-        }
+        if (egT > 0.5f) mg[c] += RookBlockPenalty(board, (Color)c);
     }
 
-    int score = (int)(mg[WHITE] * (1 - egT) + eg[WHITE] * egT)
-        - (int)(mg[BLACK] * (1 - egT) + eg[BLACK] * egT);
+    int score = (int)(mg[WHITE] * (1.0f - egT) + eg[WHITE] * egT)
+        - (int)(mg[BLACK] * (1.0f - egT) + eg[BLACK] * egT);
 
     return board.getSideToMove() == WHITE ? score : -score;
 }

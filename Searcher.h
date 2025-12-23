@@ -37,4 +37,11 @@ public:
 
     Move IterativeDeepening();
     Move GetBestMove();
+
+    inline bool IsMateScore(int score) {
+        return std::abs(score) >= MATE_SCORE - 1000;
+    }
+
+    inline int ScoreToTT(int score, int ply);
+	inline int ScoreFromTT(int score, int ply);
 };

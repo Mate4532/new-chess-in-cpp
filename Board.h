@@ -72,6 +72,7 @@ public:
     uint64_t getRookAttacks(Square sq, uint64_t occupied) const;
     uint64_t getKingAttacks(Square sq) const;
     uint64_t getInvertedPawnAttacks(Square sq, Color attackerColor) const;
+    uint64_t getPawnAttacks(Square sq, Color attackerColor) const;
     inline const uint64_t(&getBitboards() const)[2][PIECE_TYPE_COUNT]{
         return m_bitboards;
     }

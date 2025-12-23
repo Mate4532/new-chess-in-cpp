@@ -46,8 +46,7 @@ void BoardManager::startGameLoop() {
     while (true) {
 
         if (board.IsRepetition()) {
-            std::cout << "Dontetlen lepesismetles miatt!" << std::endl;
-            break;
+           //TODO
         }
 
         if (board.IsDraw()) {
@@ -65,8 +64,7 @@ void BoardManager::startGameLoop() {
 
         else {
             if (board.IsRepetition()) {
-                std::cout << "Dontetlen lepesismetles miatt!" << std::endl;
-                break;
+                //TODO
             }
 
             if (board.IsDraw()) {

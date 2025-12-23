@@ -337,6 +337,12 @@ uint64_t Board::getKingAttacks(Square sq) const {
     attacks |= (bit >> 9) & ~FILE_H;
 
     return attacks;
+
+}
+
+uint64_t Board::getPawnAttacks(Square sq, Color attackerColor) const {
+
+    return pawn_attacks_table[attackerColor][sq];
 }
 
 uint64_t Board::getInvertedPawnAttacks(Square sq, Color attackerColor) const {
@@ -610,19 +616,17 @@ void Board::MakeNullMove() {
     boardStateHistory[m_ply] = boardStateHistory[m_ply - 1];
 
     if (boardStateHistory[m_ply].en_passant_sq != SQUARE_NONE) {
-        boardStateHistory[m_ply].zobrist_hash ^= Zobrist::enPassantKeys[boardStateHistory[m_ply].en_passant_sq % 8];
+        boardStateHistory[m_ply].zobrist_hash ^= Zobrist::enPassantKeys[boardStateHistory[m_ply].en_passant_sq & 7];
         boardStateHistory[m_ply].en_passant_sq = SQUARE_NONE;
     }
 
     m_side_to_move = (m_side_to_move == WHITE) ? BLACK : WHITE;
     boardStateHistory[m_ply].zobrist_hash ^= Zobrist::sideKey;
-    repetitionTable.Push(boardStateHistory[m_ply].zobrist_hash, true);
 }
 
 void Board::UndoNullMove() {
     m_side_to_move = (m_side_to_move == WHITE) ? BLACK : WHITE;
     m_ply--;
-    repetitionTable.TryPop();
 }
 
 uint64_t Board::PerftDivide(int depth) {
