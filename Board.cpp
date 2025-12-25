@@ -27,7 +27,7 @@ void Board::InitializeBoard() {
     InitializeAttackTables();
     InitializeMagicTables();
 
-    LoadFEN("");
+    LoadFEN("8/k7/3p4/p2P1p2/P2P1P2/8/8/K7 w - - 0 1"); //r1bqkbnr/pp3ppp/3p4/2p1p3/2BnP3/2NP1N2/PPP2PPP/R1BQK2R b KQkq - 0 1 trükküs pozi
 }
 
 void Board::InitializeAttackTables() {
@@ -233,9 +233,6 @@ void Board::LoadFEN(std::string fen) {
 
     boardStateHistory[m_ply] = state;
     boardStateHistory[m_ply].zobrist_hash = GenerateFullHash();
-
-    repetitionTable = RepetitionTable();
-    repetitionTable.Push(boardStateHistory[m_ply].zobrist_hash, true);
 }
 
 PieceType Board::getPieceAt(Square sq, Color color) const {
@@ -350,10 +347,6 @@ uint64_t Board::getInvertedPawnAttacks(Square sq, Color attackerColor) const {
     return pawn_attacks_table[attackerColor ^ 1][sq];
 }
 
-bool Board::IsRepetition() const {
-    return repetitionTable.Contains(boardStateHistory[m_ply].zobrist_hash);
-}
-
 bool Board::IsCheckMate() {
     Color us = m_side_to_move;
     Color enemy = (Color)(us ^ 1);
@@ -377,8 +370,6 @@ bool Board::IsCheckMate() {
 bool Board::IsDraw() {
 
     if (boardStateHistory[m_ply].half_move_clock >= 100) return true;
-
-    if (IsRepetition()) return true;
 
     Color us = m_side_to_move;
     Color enemy = (Color)(us ^ 1);
@@ -529,11 +520,11 @@ bool Board::MakeMove(Move move) {
     boardStateHistory[m_ply] = newBoardState;
     m_side_to_move = enemy;
 
+	move_history.push_back(move);
+
     bool reset =
         (piece == PAWN) ||
         (flags & CAPTURE_FLAG);
-
-    repetitionTable.Push(newBoardState.zobrist_hash, reset);
 
     Square kingSq = getKingSquare(player);
     if (isSquareAttacked(kingSq, enemy)) {
@@ -607,7 +598,7 @@ void Board::UndoMove(Move move) {
 
     m_all_occupancy = m_side_occupancy[WHITE] | m_side_occupancy[BLACK];
     m_ply--;
-    repetitionTable.TryPop();
+    move_history.pop_back();
 }
 
 void Board::MakeNullMove() {

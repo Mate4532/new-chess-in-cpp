@@ -1,15 +1,2 @@
-﻿  Board.cpp
-  BoardManager.cpp
-  Evaluation.cpp
-D:\projects\Visual Studio projects\new-chess-in-cpp\Evaluation.cpp(143,21): warning C4244: 'return': conversion from 'float' to 'int', possible loss of data
-D:\projects\Visual Studio projects\new-chess-in-cpp\Evaluation.cpp(153,29): warning C4244: 'return': conversion from 'float' to 'int', possible loss of data
-  MoveGenerator.cpp
-  MoveOrdering.cpp
-  RepetitionTable.cpp
-  Searcher.cpp
-  UCIParsing.cpp
-  Zobrist.cpp
-  new chess in cpp.cpp
-  Generating Code...
-  LINK : D:\projects\Visual Studio projects\new-chess-in-cpp\x64\Debug\new chess in cpp.exe not found or not built by the last incremental link; performing full link
+﻿  Searcher.cpp
   new chess in cpp.vcxproj -> D:\projects\Visual Studio projects\new-chess-in-cpp\x64\Debug\new chess in cpp.exe

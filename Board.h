@@ -33,8 +33,6 @@ private:
 
     Color m_side_to_move = WHITE;
 
-    RepetitionTable repetitionTable;
-
     static uint64_t pawn_attacks_table[2][64];
     static uint64_t knight_attacks_table[64];
     static uint64_t king_attacks_table[64];
@@ -49,6 +47,8 @@ private:
     static int raw_rook_shifts[];
     static uint64_t raw_bishop_magics[];
     static int raw_bishop_shifts[];
+
+	std::vector<Move> move_history;
 
     inline int GetSquare(int rank, int file) const {
         return rank * 8 + file;
@@ -112,10 +112,9 @@ public:
     inline uint16_t getPly() const {
         return m_ply;
 	}
-    inline RepetitionTable& getRepetitionTable() {
-        return repetitionTable;
-	}
-    bool IsRepetition() const;
+    inline const Move& getLastMove() {
+		return move_history[move_history.size() - 1];
+    }
 	bool IsDraw();
     bool IsCheckMate();
     bool isSquareAttacked(Square sq, Color attackerColor) const;

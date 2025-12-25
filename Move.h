@@ -14,6 +14,8 @@ public:
         m_piece_type = piece_type;
     }
 
+	Move(uint16_t move_data, uint8_t piece_type) : m_move_data(move_data), m_piece_type(piece_type) {}
+
     inline Square getFrom() const {
         return (Square)((m_move_data >> 6) & 0x3F);
     }

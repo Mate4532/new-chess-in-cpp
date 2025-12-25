@@ -63,15 +63,11 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply) {
     int ttScore;
     Move ttMove;
 
-    bool inCheck = board.isSquareAttacked(
+    bool inCheckBeforeMove = board.isSquareAttacked(
         board.getKingSquare(board.getSideToMove()),
         (Color)(board.getSideToMove() ^ 1));
 
-    if (ply > 0 && !inCheck && board.IsRepetition()) {
-        return 0;
-    }
-
-    if (inCheck)
+    if (inCheckBeforeMove)
         depth++;
 
     if (tt.Probe(hash, depth, alpha, beta, ttScore, ttMove)) {
@@ -81,7 +77,7 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply) {
     if (depth <= 0)
         return quiescence(alpha, beta);
 
-    if (depth >= 3 && !inCheck && ply > 0) {
+    if (depth >= 4 && !inCheckBeforeMove && ply > 0) {
 
         Color us = board.getSideToMove();
 
@@ -136,8 +132,12 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply) {
             !(m.getFlags() & CAPTURE_FLAG) &&
             !(m.getFlags() & PROMOTION_FLAG);
 
-        if (depth >= 3 && legalMoves > 3 && quiet && !inCheck) {
-            score = -negamax(depth - 3, -alpha - 1, -alpha, ply + 1);
+        bool inCheckAfterMove = board.isSquareAttacked(
+            board.getKingSquare(board.getSideToMove()),
+            (Color)(board.getSideToMove() ^ 1));
+
+        if (depth >= 3 && legalMoves > 3 && quiet && !inCheckAfterMove) {
+            score = -negamax(depth - 2, -alpha - 1, -alpha, ply + 1);
             if (score > alpha)
                 score = -negamax(depth - 1, -beta, -alpha, ply + 1);
         }
@@ -153,8 +153,8 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply) {
             if (quiet) {
                 historyMoves[board.getSideToMove()][m.getFrom()][m.getTo()] += depth * depth;
             }
-            tt.Store(hash, ScoreToTT(beta, ply), depth, BETA, m);
-            return beta;
+            tt.Store(hash, ScoreToTT(score, ply), depth, TT_BETA, m);
+            return score;
         }
 
         if (score > alpha) {
@@ -164,20 +164,12 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply) {
     }
 
     if (legalMoves == 0) {
-        int score = inCheck ? -MATE_SCORE + ply : 0;
-
-        tt.Store(
-            hash,
-            ScoreToTT(score, ply),
-            depth,
-            EXACT,
-            Move()
-        );
+        int score = inCheckBeforeMove ? -MATE_SCORE + ply : 0;
 
         return score;
     }
 
-    TTFlag flag = (alpha <= originalAlpha) ? ALPHA : EXACT;
+    TTFlag flag = (alpha <= originalAlpha) ? TT_ALPHA : TT_EXACT;
     tt.Store(hash, ScoreToTT(alpha, ply), depth, flag, bestMove);
 
     return alpha;
@@ -201,9 +193,8 @@ Move Searcher::IterativeDeepening() {
     startTime = now_ms();
     stop = false;
     nodes = 0;
+    tt.NewWrite();
     AgeHistory();
-
-    board.getRepetitionTable().Init(board);
 
     Move bestMove;
     int lastScore = 0;
