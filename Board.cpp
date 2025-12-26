@@ -18,9 +18,7 @@ Magic Board::bishop_magics[64];
 
 std::atomic<uint64_t> global_node_count(0);
 
-Board::Board(): MoveHistory(), repetition_history() {
-    MoveHistory.reserve(256);
-	repetition_history.reserve(256);
+Board::Board() {
     InitializeBoard();
 }
 
@@ -29,7 +27,7 @@ void Board::InitializeBoard() {
     InitializeAttackTables();
     InitializeMagicTables();
 
-    LoadFEN("");
+    LoadFEN("rnbq1r1k/pp1npPbp/3p4/4P3/5P2/2p2N2/PPP3P1/R1BQKB1R w KQ - 0 1"); //r1bqkbnr/pp3ppp/3p4/2p1p3/2BnP3/2NP1N2/PPP2PPP/R1BQK2R b KQkq - 0 1 trükküs pozi
 }
 
 void Board::InitializeAttackTables() {
@@ -351,62 +349,6 @@ uint64_t Board::getInvertedPawnAttacks(Square sq, Color attackerColor) const {
     return pawn_attacks_table[attackerColor ^ 1][sq];
 }
 
-bool Board::InsufficientMaterial() const {
-    int pawns = 0, rooks = 0, queens = 0;
-    int bishops[2] = { 0, 0 };
-    int knights[2] = { 0, 0 };
-
-    Square bishopSq[2][2];
-    int bishopCount[2] = { 0, 0 };
-
-    for (int c = WHITE; c <= BLACK; c++) {
-        pawns += piece_count[c][PAWN];
-        rooks += piece_count[c][ROOK];
-        queens += piece_count[c][QUEEN];
-        knights[c] = piece_count[c][KNIGHT];
-        bishops[c] = piece_count[c][BISHOP];
-
-        if (bishops[c] > 0) {
-            uint64_t bb = m_bitboards[c][BISHOP];
-            while (bb && bishopCount[c] < 2) {
-                bishopSq[c][bishopCount[c]++] = PopBit(bb);
-            }
-        }
-    }
-
-    if (pawns > 0 || rooks > 0 || queens > 0)
-        return false;
-
-    if (bishops[WHITE] == 0 && bishops[BLACK] == 0 &&
-        knights[WHITE] == 0 && knights[BLACK] == 0)
-        return true;
-
-    if ((knights[WHITE] == 1 && bishops[WHITE] == 0 &&
-        knights[BLACK] == 0 && bishops[BLACK] == 0) ||
-        (knights[BLACK] == 1 && bishops[BLACK] == 0 &&
-            knights[WHITE] == 0 && bishops[WHITE] == 0))
-        return true;
-
-    if ((bishops[WHITE] == 1 && knights[WHITE] == 0 &&
-        bishops[BLACK] == 0 && knights[BLACK] == 0) ||
-        (bishops[BLACK] == 1 && knights[BLACK] == 0 &&
-            bishops[WHITE] == 0 && knights[WHITE] == 0))
-        return true;
-
-    if (bishops[WHITE] == 1 && bishops[BLACK] == 1 &&
-        knights[WHITE] == 0 && knights[BLACK] == 0) {
-
-        bool whiteLight = IsLightSquare(bishopSq[WHITE][0]);
-        bool blackLight = IsLightSquare(bishopSq[BLACK][0]);
-
-        if (whiteLight == blackLight)
-            return true;
-    }
-
-    return false;
-}
-
-
 bool Board::IsCheckMate() {
     Color us = m_side_to_move;
     Color enemy = (Color)(us ^ 1);
@@ -418,8 +360,8 @@ bool Board::IsCheckMate() {
     MoveGenerator::GenerateMoves(*this, moves);
 
     for (int i = 0; i < moves.size(); i++) {
-        if (MakeMove(moves[i])) {
-            UndoMove(moves[i]);
+        if (MakeMove(moves[i], true)) {
+            UndoMove(moves[i], true);
             return false;
         }
     }
@@ -471,7 +413,6 @@ bool Board::MakeMove(Move move, bool in_search) {
     Color player = m_side_to_move;
     Color enemy = (player == WHITE) ? BLACK : WHITE;
     PieceType piece = move.getPieceType();
-    PieceType captured = getPieceAt(to_sq, enemy);
 
     BoardState newBoardState;
     newBoardState.captured_piece_type = PIECE_NONE;
@@ -496,6 +437,7 @@ bool Board::MakeMove(Move move, bool in_search) {
             piece_count[enemy][PAWN]--;
         }
         else {
+            PieceType captured = getPieceAt(to_sq, enemy);
 
             newHash ^= Zobrist::pieceKeys[enemy][captured][to_sq];
 
@@ -506,10 +448,9 @@ bool Board::MakeMove(Move move, bool in_search) {
         }
     }
 
-    if (piece == PAWN || captured != PIECE_NONE) {
+    if (piece == PAWN || (move.getFlags() & CAPTURE_FLAG)) {
         if (!in_search) {
-            while (!repetition_history.empty())
-                repetition_history.pop_back();
+			repetition_history.clear();
         }
         newBoardState.half_move_clock = 0;
     }
@@ -587,9 +528,13 @@ bool Board::MakeMove(Move move, bool in_search) {
     m_side_to_move = enemy;
 
     if (!in_search) {
-        repetition_history.push_back(newHash);
-		MoveHistory.push_back(move);
-	}
+		repetition_history.push_back(newHash);
+		move_history.push_back(move);
+    }
+
+    bool reset =
+        (piece == PAWN) ||
+        (flags & CAPTURE_FLAG);
 
     Square kingSq = getKingSquare(player);
     if (isSquareAttacked(kingSq, enemy)) {
@@ -661,15 +606,15 @@ void Board::UndoMove(Move move, bool in_search) {
         }
     }
 
-    m_all_occupancy = m_side_occupancy[WHITE] | m_side_occupancy[BLACK];
-    m_ply--;
-
     if (!in_search) {
-        if (repetition_history.size() > 0) {
+		if (repetition_history.size() > 0) {
             repetition_history.pop_back();
         }
-		MoveHistory.pop_back();
+        move_history.pop_back();
     }
+
+    m_all_occupancy = m_side_occupancy[WHITE] | m_side_occupancy[BLACK];
+    m_ply--;
 }
 
 void Board::MakeNullMove() {

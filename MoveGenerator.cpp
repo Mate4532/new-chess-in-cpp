@@ -65,15 +65,18 @@ void MoveGenerator::GenerateMoves(const Board& board, MoveList& moveList, bool g
 
                 if (generate_only_captures) {
                     moves &= enemy_occ;
+                    while (moves) {
+                        Square to_sq = PopBit(moves);
+                        moveList.push_back(Move(from_sq, to_sq, piece_type, CAPTURE));
+                    }
                 }
                 else {
                     moves &= ~friendly_occ;
-                }
-
-                while (moves) {
-                    Square to_sq = PopBit(moves);
-                    MoveFlag flag = ((1ULL << to_sq) & enemy_occ) ? CAPTURE : NORMAL_MOVE;
-                    moveList.push_back(Move(from_sq, to_sq, piece_type, flag));
+                    while (moves) {
+                        Square to_sq = PopBit(moves);
+                        MoveFlag flag = ((1ULL << to_sq) & enemy_occ) ? CAPTURE : NORMAL_MOVE;
+                        moveList.push_back(Move(from_sq, to_sq, piece_type, flag));
+                    }
                 }
 
                 if (!generate_only_captures && piece_type == KING) {

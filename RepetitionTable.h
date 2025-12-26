@@ -2,7 +2,6 @@
 #include <cstdint>
 #include <algorithm>
 #include <vector>
-#include "Board.h"
 
 class Board;
 

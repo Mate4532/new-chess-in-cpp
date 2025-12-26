@@ -14,7 +14,6 @@
 #include <chrono>
 #include <thread>
 #include "RepetitionTable.h"
-#include <stack>
 
 struct Magic {
     uint64_t mask;
@@ -32,10 +31,10 @@ private:
     BoardState boardStateHistory[1024] = {};
     uint16_t m_ply = 0;
 
-    std::vector<Move> MoveHistory;
-	std::vector<uint64_t> repetition_history;
-
     Color m_side_to_move = WHITE;
+
+	std::vector<uint64_t> repetition_history;
+    std::vector<Move> move_history;
 
     static uint64_t pawn_attacks_table[2][64];
     static uint64_t knight_attacks_table[64];
@@ -111,24 +110,15 @@ public:
     inline uint64_t getHash(int i = -1) const {
         return boardStateHistory[i == -1 ? m_ply : i].zobrist_hash;
     }
-    inline std::vector<uint64_t> getRepetitionHistory() const {
+    inline std::vector<uint64_t> getRepetitionHash() const {
         return repetition_history;
-    }
+	}
     inline uint16_t getPly() const {
         return m_ply;
 	}
-    inline const Move& getLastMove() const {
-        return MoveHistory[m_ply];
+    inline const Move& getLastMove() {
+		return move_history[move_history.size() - 1];
     }
-    inline bool IsLightSquare(Square sq) const {
-        int file = sq & 7;
-        int rank = sq >> 3;
-        return ((file + rank) & 1) == 0;
-    }
-    inline uint8_t getPieceCount(Color c, PieceType p) const {
-        return piece_count[c][p];
-	}
-    bool InsufficientMaterial() const;
 	bool IsDraw();
     bool IsCheckMate();
     bool isSquareAttacked(Square sq, Color attackerColor) const;

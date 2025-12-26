@@ -88,6 +88,17 @@ const uint64_t RANK_6 = 0x0000FF0000000000ULL;
 const uint64_t RANK_7 = 0x00FF000000000000ULL;
 const uint64_t RANK_8 = 0xFF00000000000000ULL;
 
+const uint64_t RANK_MASKS[8] = {
+    RANK_1,
+    RANK_2,
+    RANK_3,
+    RANK_4,
+    RANK_5,
+    RANK_6,
+    RANK_7,
+    RANK_8
+};
+
 const uint64_t FILE_A = 0x0101010101010101ULL;
 const uint64_t FILE_B = 0x0202020202020202ULL;
 const uint64_t FILE_C = 0x0404040404040404ULL;

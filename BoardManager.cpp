@@ -49,18 +49,18 @@ void BoardManager::MakeRobotMove() {
 
     Move best_move = searcher.GetBestMove();
 
-	board.MakeMove(best_move);
+    board.MakeMove(best_move);
     std::cout << "Robot lepese: " + best_move.toAlgebraic() << std::endl;
 }
 
 void BoardManager::startGameLoop() {
 
-	std::string userInput;
+    std::string userInput;
 
     while (true) {
 
         if (board.IsDraw()) {
-            
+
         }
 
         if (board.IsCheckMate()) {
@@ -74,7 +74,7 @@ void BoardManager::startGameLoop() {
         else {
 
             if (board.IsDraw()) {
-                
+
             }
 
             if (board.IsCheckMate()) {
@@ -104,7 +104,7 @@ void BoardManager::startGameLoop() {
 
             int n = 0;
 
-            if (trimmed.size() == 1){ 
+            if (trimmed.size() == 1) {
                 n = 1;
             }
             else {
@@ -124,13 +124,13 @@ void BoardManager::startGameLoop() {
         MoveList moves;
         MoveGenerator::GenerateMoves(board, moves);
 
-        if (!moves.contains(move)){
+        if (!moves.contains(move)) {
             std::cout << "A lepes nem ervenyes!" << std::endl;
             continue;
         }
 
         if (move.getPieceType() != PIECE_NONE) {
-            if (board.MakeMove(move)) {
+            if (board.MakeMove(move, true)) {
                 std::cout << "Sikeres lepes!" << std::endl;
             }
             else {

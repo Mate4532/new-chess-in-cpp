@@ -54,6 +54,9 @@
     <ClCompile Include="PrecomputedEvaluationData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LMR.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Board.h">
@@ -102,6 +105,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PrecomputedEvaluationData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LMR.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

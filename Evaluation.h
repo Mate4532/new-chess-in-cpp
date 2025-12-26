@@ -92,13 +92,13 @@ static const int king_pst_eg[64] = {
 class Evaluation {
 public:
     static int GetPieceValue(PieceType p);
-	static int EvaluatePos(const Board& board);
+    static int EvaluatePos(const Board& board);
     static int EvaluatePawns(const Board& board, Color color);
     static int EvaluatePawnCenter(const Board& board, Color color);
-    static int MaterialImbalancePenalty(PieceType lost, int pawnsGained, float egT);
-    static int KingPawnShield(const Board& board, Color color, float egT);
+    static int MaterialImbalancePenalty(PieceType lost, int pawnsGained);
+    static int KingPawnShield(const Board& board, Color color);
     static int RookBlockPenalty(const Board& board, Color color);
-    static int MopUpEval(const Board& board, Color winner, float endgameT);
+    static int MopUpEval(const Board& board, Color winner);
     static int EvaluateKingSafety(const Board& board, Color color);
     static int EvaluatePawnTerritory(const Board& board, Color color);
 };

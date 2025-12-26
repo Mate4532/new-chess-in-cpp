@@ -1,5 +1,7 @@
-#include "Move.h"
+#pragma once
 #include <vector>
+#include <cstdint>
+#include "Move.h"
 
 enum TTFlag : uint8_t { TT_NONE, TT_EXACT, TT_ALPHA, TT_BETA };
 
@@ -8,10 +10,9 @@ struct TTEntry {
     int32_t  score;
     uint16_t moveValue;
     uint8_t  movePieceType;
-    int8_t  depth;
+    int8_t   depth;
     uint8_t  type;
     uint8_t  gen;
-    uint8_t  padding[6];
 };
 
 class TranspositionTable {
