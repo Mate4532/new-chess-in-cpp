@@ -1,14 +1,18 @@
 #include "RepetitionTable.h"
 #include "Board.h"
 
-void RepetitionTable::Init(const Board& board) {
-    count = 0;
 
-    for (int i = 0; i <= board.getPly(); i++) {
-        uint64_t hash = board.getHash(i);
-        bool reset = (board.getHalfMoveClock(i) == 0);
-        Push(hash, reset);
+
+void RepetitionTable::Init(const Board& board) {
+
+	std::vector<uint64_t> repetition_hashes = board.getRepetitionHash();
+    count = repetition_hashes.size();
+
+    for (int i = 0; i < repetition_hashes.size(); i++) {
+        hashes[i] = repetition_hashes[i];
+        startIndices[i] = 0;
     }
+    startIndices[count] = 0;
 }
 
 void RepetitionTable::Push(uint64_t hash, bool reset)
@@ -22,14 +26,12 @@ void RepetitionTable::Push(uint64_t hash, bool reset)
 
 void RepetitionTable::TryPop()
 {
-    if (count > 0)
-        --count;
+    count = std::max(0, count - 1);
 }
 
 bool RepetitionTable::Contains(uint64_t hash) const {
-    if (count < 2) return false;
 
-    int start = startIndices[count - 1];
+    int start = startIndices[count];
 
     for (int i = start; i < count - 1; i++) {
         if (hashes[i] == hash) {

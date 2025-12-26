@@ -33,6 +33,9 @@ private:
 
     Color m_side_to_move = WHITE;
 
+	std::vector<uint64_t> repetition_history;
+    std::vector<Move> move_history;
+
     static uint64_t pawn_attacks_table[2][64];
     static uint64_t knight_attacks_table[64];
     static uint64_t king_attacks_table[64];
@@ -47,8 +50,6 @@ private:
     static int raw_rook_shifts[];
     static uint64_t raw_bishop_magics[];
     static int raw_bishop_shifts[];
-
-	std::vector<Move> move_history;
 
     inline int GetSquare(int rank, int file) const {
         return rank * 8 + file;
@@ -109,6 +110,9 @@ public:
     inline uint64_t getHash(int i = -1) const {
         return boardStateHistory[i == -1 ? m_ply : i].zobrist_hash;
     }
+    inline std::vector<uint64_t> getRepetitionHash() const {
+        return repetition_history;
+	}
     inline uint16_t getPly() const {
         return m_ply;
 	}
@@ -118,8 +122,8 @@ public:
 	bool IsDraw();
     bool IsCheckMate();
     bool isSquareAttacked(Square sq, Color attackerColor) const;
-    bool MakeMove(Move move);
-    void UndoMove(Move move);
+    bool MakeMove(Move move, bool in_search = false);
+    void UndoMove(Move move, bool in_search = false);
     void MakeNullMove();
     void UndoNullMove();
     uint64_t PerftDivide(int depth);

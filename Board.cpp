@@ -27,7 +27,7 @@ void Board::InitializeBoard() {
     InitializeAttackTables();
     InitializeMagicTables();
 
-    LoadFEN("8/k7/3p4/p2P1p2/P2P1P2/8/8/K7 w - - 0 1"); //r1bqkbnr/pp3ppp/3p4/2p1p3/2BnP3/2NP1N2/PPP2PPP/R1BQK2R b KQkq - 0 1 trükküs pozi
+    LoadFEN(""); //r1bqkbnr/pp3ppp/3p4/2p1p3/2BnP3/2NP1N2/PPP2PPP/R1BQK2R b KQkq - 0 1 trükküs pozi
 }
 
 void Board::InitializeAttackTables() {
@@ -233,6 +233,8 @@ void Board::LoadFEN(std::string fen) {
 
     boardStateHistory[m_ply] = state;
     boardStateHistory[m_ply].zobrist_hash = GenerateFullHash();
+
+    repetition_history.push_back(boardStateHistory[m_ply].zobrist_hash);
 }
 
 PieceType Board::getPieceAt(Square sq, Color color) const {
@@ -358,8 +360,8 @@ bool Board::IsCheckMate() {
     MoveGenerator::GenerateMoves(*this, moves);
 
     for (int i = 0; i < moves.size(); i++) {
-        if (MakeMove(moves[i])) {
-            UndoMove(moves[i]);
+        if (MakeMove(moves[i], true)) {
+            UndoMove(moves[i], true);
             return false;
         }
     }
@@ -380,8 +382,8 @@ bool Board::IsDraw() {
         MoveGenerator::GenerateMoves(*this, moves);
 
         for (int i = 0; i < moves.size(); i++) {
-            if (MakeMove(moves[i])) {
-                UndoMove(moves[i]);
+            if (MakeMove(moves[i], true)) {
+                UndoMove(moves[i], true);
                 return false;
             }
         }
@@ -404,7 +406,7 @@ bool Board::isSquareAttacked(Square sq, Color attackerColor) const {
     return false;
 }
 
-bool Board::MakeMove(Move move) {
+bool Board::MakeMove(Move move, bool in_search) {
     Square from_sq = move.getFrom();
     Square to_sq = move.getTo();
     MoveFlag flags = move.getFlags();
@@ -446,7 +448,12 @@ bool Board::MakeMove(Move move) {
         }
     }
 
-    if (piece == PAWN) newBoardState.half_move_clock = 0;
+    if (piece == PAWN || (move.getFlags() & CAPTURE_FLAG)) {
+        if (!in_search) {
+			repetition_history.clear();
+        }
+        newBoardState.half_move_clock = 0;
+    }
 
     if (flags & PROMOTION_FLAG) {
         m_bitboards[player][PAWN] ^= (1ULL << from_sq);
@@ -520,7 +527,10 @@ bool Board::MakeMove(Move move) {
     boardStateHistory[m_ply] = newBoardState;
     m_side_to_move = enemy;
 
-	move_history.push_back(move);
+    if (!in_search) {
+		repetition_history.push_back(newHash);
+		move_history.push_back(move);
+    }
 
     bool reset =
         (piece == PAWN) ||
@@ -528,14 +538,14 @@ bool Board::MakeMove(Move move) {
 
     Square kingSq = getKingSquare(player);
     if (isSquareAttacked(kingSq, enemy)) {
-        UndoMove(move);
+        UndoMove(move, in_search);
         return false;
     }
 
     return true;
 }
 
-void Board::UndoMove(Move move) {
+void Board::UndoMove(Move move, bool in_search) {
     Square from_sq = move.getFrom();
     Square to_sq = move.getTo();
     MoveFlag flags = move.getFlags();
@@ -596,9 +606,15 @@ void Board::UndoMove(Move move) {
         }
     }
 
+    if (!in_search) {
+		if (repetition_history.size() > 0) {
+            repetition_history.pop_back();
+        }
+        move_history.pop_back();
+    }
+
     m_all_occupancy = m_side_occupancy[WHITE] | m_side_occupancy[BLACK];
     m_ply--;
-    move_history.pop_back();
 }
 
 void Board::MakeNullMove() {

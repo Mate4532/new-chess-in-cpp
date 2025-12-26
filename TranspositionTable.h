@@ -13,7 +13,6 @@ struct TTEntry {
     int8_t   depth;
     uint8_t  type;
     uint8_t  gen;
-    uint8_t  padding[6];
 };
 
 class TranspositionTable {

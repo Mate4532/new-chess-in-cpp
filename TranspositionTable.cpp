@@ -42,11 +42,11 @@ bool TranspositionTable::Probe(uint64_t hash, int depth, int alpha, int beta, in
         }
 
         if (e.type == TT_ALPHA && e.score <= alpha) {
-            score = e.score;
+            score = alpha;
             return true;
         }
         if (e.type == TT_BETA && e.score >= beta) {
-            score = e.score;
+            score = beta;
             return true;
         }
     }

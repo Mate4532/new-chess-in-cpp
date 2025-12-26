@@ -130,7 +130,7 @@ void BoardManager::startGameLoop() {
         }
 
         if (move.getPieceType() != PIECE_NONE) {
-            if (board.MakeMove(move)) {
+            if (board.MakeMove(move, true)) {
                 std::cout << "Sikeres lepes!" << std::endl;
             }
             else {
