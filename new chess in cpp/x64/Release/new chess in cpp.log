@@ -1,7 +1,7 @@
-﻿  Searcher.cpp
+﻿  Board.cpp
   Generating code
-  1 of 695 functions ( 0.1%) were compiled, the rest were copied from previous compilation.
+  4 of 690 functions ( 0.6%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    6 functions had inline decision re-evaluated but remain unchanged
+    8 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
-  new chess in cpp.vcxproj -> D:\projects\Visual Studio projects\new-chess-in-cpp\x64\Release\new chess in cpp.exe
+  new chess in cpp.vcxproj -> C:\Users\szeke\VisualStudioProjects\new-chess-in-cpp\x64\Release\new chess in cpp.exe

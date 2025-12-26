@@ -35,6 +35,34 @@ int Evaluation::GetPieceValue(PieceType p) {
     }
 }
 
+int Evaluation::EvaluateMobility(const Board& board, Color color) {
+    int mobilityScore = 0;
+    uint64_t occupied = board.getAllOccupancy();
+
+    uint64_t bishops = board.getPieceBitboard(color, BISHOP);
+    while (bishops) {
+        Square sq = PopBit(bishops);
+        uint64_t attacks = board.getBishopAttacks(sq, occupied);
+        mobilityScore += std::popcount(attacks);
+    }
+
+    uint64_t rooks = board.getPieceBitboard(color, ROOK);
+    while (rooks) {
+        Square sq = PopBit(rooks);
+        uint64_t attacks = board.getRookAttacks(sq, occupied);
+        mobilityScore += std::popcount(attacks);
+    }
+
+    uint64_t queens = board.getPieceBitboard(color, QUEEN);
+    while (queens) {
+        Square sq = PopBit(queens);
+        uint64_t attacks = board.getBishopAttacks(sq, occupied) | board.getRookAttacks(sq, occupied);
+        mobilityScore += std::popcount(attacks) * 0.5;
+    }
+
+    return mobilityScore;
+}
+
 int Evaluation::EvaluatePawnTerritory(const Board& board, Color color) {
     uint64_t pawns = board.getPieceBitboard(color, PAWN);
     int bonus = 0;
@@ -90,8 +118,10 @@ int Evaluation::EvaluatePawns(const Board& board, Color color) {
     uint64_t pawns = board.getPieceBitboard(color, PAWN);
     uint64_t enemyPawns = board.getPieceBitboard((Color)(color ^ 1), PAWN);
 
+
     int score = 0;
     int isolated = 0;
+    int connectedCount = 0;
 
     uint64_t bb = pawns;
     while (bb) {
@@ -103,11 +133,19 @@ int Evaluation::EvaluatePawns(const Board& board, Color color) {
         if (file > 0) adjacentFilesMask |= FILE_MASKS[file - 1];
         if (file < 7) adjacentFilesMask |= FILE_MASKS[file + 1];
 
-        if (!(pawns & adjacentFilesMask))
+        if (pawns & adjacentFilesMask) {
+            connectedCount++;
+
+            uint64_t defenders = board.getPawnAttacks(sq, (Color)(color ^ 1));
+            if (defenders & pawns) {
+                score += 10;
+            }
+        }
+        else {
             isolated++;
+        }
 
         uint64_t pathMask = FILE_MASKS[file] | adjacentFilesMask;
-
         uint64_t forwardMask = 0;
         if (color == WHITE) {
             for (int r = rank + 1; r < 8; r++) forwardMask |= RANK_MASKS[r];
@@ -128,6 +166,9 @@ int Evaluation::EvaluatePawns(const Board& board, Color color) {
     }
 
     score += isolatedPawnPenalty[std::clamp(isolated, 0, 8)];
+
+    score += connectedCount * 5;
+
     return score;
 }
 
@@ -281,6 +322,10 @@ int Evaluation::EvaluatePos(const Board& board) {
 
         if (egT > 0.7f && mg[c] > mg[opp] + 400)
             eg[c] += MopUpEval(board, (Color)c);
+
+        int mobility = EvaluateMobility(board, (Color)c);
+        mg[c] += mobility;
+        eg[c] += mobility;
 
         mg[c] += RookBlockPenalty(board, (Color)c);
     }
