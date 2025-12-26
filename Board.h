@@ -14,6 +14,7 @@
 #include <chrono>
 #include <thread>
 #include "RepetitionTable.h"
+#include <stack>
 
 struct Magic {
     uint64_t mask;
@@ -31,9 +32,10 @@ private:
     BoardState boardStateHistory[1024] = {};
     uint16_t m_ply = 0;
 
-    Color m_side_to_move = WHITE;
+    std::vector<Move> MoveHistory;
+	std::vector<uint64_t> repetition_history;
 
-    RepetitionTable repetitionTable;
+    Color m_side_to_move = WHITE;
 
     static uint64_t pawn_attacks_table[2][64];
     static uint64_t knight_attacks_table[64];
@@ -109,18 +111,29 @@ public:
     inline uint64_t getHash(int i = -1) const {
         return boardStateHistory[i == -1 ? m_ply : i].zobrist_hash;
     }
+    inline std::vector<uint64_t> getRepetitionHistory() const {
+        return repetition_history;
+    }
     inline uint16_t getPly() const {
         return m_ply;
 	}
-    inline RepetitionTable& getRepetitionTable() {
-        return repetitionTable;
+    inline const Move& getLastMove() const {
+        return MoveHistory[m_ply];
+    }
+    inline bool IsLightSquare(Square sq) const {
+        int file = sq & 7;
+        int rank = sq >> 3;
+        return ((file + rank) & 1) == 0;
+    }
+    inline uint8_t getPieceCount(Color c, PieceType p) const {
+        return piece_count[c][p];
 	}
-    bool IsRepetition() const;
+    bool InsufficientMaterial() const;
 	bool IsDraw();
     bool IsCheckMate();
     bool isSquareAttacked(Square sq, Color attackerColor) const;
-    bool MakeMove(Move move);
-    void UndoMove(Move move);
+    bool MakeMove(Move move, bool in_search = false);
+    void UndoMove(Move move, bool in_search = false);
     void MakeNullMove();
     void UndoNullMove();
     uint64_t PerftDivide(int depth);

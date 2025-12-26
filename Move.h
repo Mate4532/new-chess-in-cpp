@@ -13,6 +13,7 @@ public:
         m_move_data = (uint16_t)(flags << 12) | (from << 6) | to;
         m_piece_type = piece_type;
     }
+    explicit Move(uint16_t raw_data, uint8_t piece_type) : m_move_data(raw_data), m_piece_type(piece_type) {}
 
     inline Square getFrom() const {
         return (Square)((m_move_data >> 6) & 0x3F);

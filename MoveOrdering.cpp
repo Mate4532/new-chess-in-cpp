@@ -5,6 +5,8 @@ static inline int ScoreMove(
     const Board& board,
     const Move& m,
     const Move& ttMove,
+    const Move killerMoves[MAX_PLY][2],
+    int ply,
     const int history[2][MAX_KILLER_HISTORY][MAX_KILLER_HISTORY]
 ) {
     Color us = board.getSideToMove();
@@ -26,9 +28,12 @@ static inline int ScoreMove(
         return 5'000'000 + v * 16 - a;
     }
 
+    if (m.getMoveData() == killerMoves[ply][0].getMoveData()) return 900'000;
+    if (m.getMoveData() == killerMoves[ply][1].getMoveData()) return 800'000;
+
     if (m.getFlags() & PROMOTION_FLAG) {
         if ((m.getFlags() & 0b0011) == PROMOTION_TYPE_QUEEN)
-            return 4'000'000;
+            return 9'000'000;
         return 3'000'000;
     }
 
@@ -39,6 +44,8 @@ void MoveOrdering::SortMoves(
     const Board& board,
     MoveList& moves,
     Move ttMove,
+    const Move killerMoves[MAX_PLY][2],
+    int ply,
     const int history[2][MAX_KILLER_HISTORY][MAX_KILLER_HISTORY]
 ) {
     int scores[256];
@@ -49,6 +56,8 @@ void MoveOrdering::SortMoves(
             board,
             moves[i],
             ttMove,
+            killerMoves,
+            ply,
             history
         );
     }
@@ -63,5 +72,30 @@ void MoveOrdering::SortMoves(
             std::swap(scores[i], scores[best]);
             std::swap(moves[i], moves[best]);
         }
+    }
+}
+
+void MoveOrdering::SortQuiescenceMoves(const Board& board, MoveList& moves) {
+    int scores[256];
+    int n = (int)moves.size();
+
+    for (int i = 0; i < n; i++) {
+        const Move& m = moves[i];
+
+        PieceType victim = board.getPieceAt(m.getTo(), (Color)(board.getSideToMove() ^ 1));
+        PieceType attacker = m.getPieceType();
+
+        scores[i] = Evaluation::GetPieceValue(victim) * 10 - Evaluation::GetPieceValue(attacker);
+
+        if (m.getFlags() & PROMOTION_FLAG) scores[i] += 10000;
+    }
+
+    for (int i = 0; i < n - 1; i++) {
+        int best = i;
+        for (int j = i + 1; j < n; j++) {
+            if (scores[j] > scores[best]) best = j;
+        }
+        std::swap(scores[i], scores[best]);
+        std::swap(moves[i], moves[best]);
     }
 }

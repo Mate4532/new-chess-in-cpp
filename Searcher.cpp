@@ -29,27 +29,33 @@ int Searcher::quiescence(int alpha, int beta) {
     if (stop) return alpha;
 
     int standPat = Evaluation::EvaluatePos(board);
+
+    if (standPat >= MATE_SCORE) return standPat;
+    if (standPat <= -MATE_SCORE) return standPat;
+
     if (standPat >= beta) return beta;
     if (standPat > alpha) alpha = standPat;
 
     MoveList moves;
     MoveGenerator::GenerateMoves(board, moves, true);
-
-    MoveOrdering::SortMoves(board, moves, Move(), historyMoves);
+	MoveOrdering::SortQuiescenceMoves(board, moves);
 
     for (const Move& m : moves) {
-        if (!board.MakeMove(m)) continue;
+
+        if (!board.MakeMove(m, true)) continue;
         int score = -quiescence(-beta, -alpha);
-        board.UndoMove(m);
+        board.UndoMove(m, true);
 
         if (stop) return alpha;
         if (score >= beta) return beta;
         if (score > alpha) alpha = score;
     }
+
     return alpha;
 }
 
-int Searcher::negamax(int depth, int alpha, int beta, int ply) {
+
+int Searcher::negamax(int depth, int alpha, int beta, int ply, const Move& prevMove, bool prevWasCapture) {
 
     nodes++;
     if ((nodes & 2047) == 0 && now_ms() - startTime >= robot_thinking_time_ms)
@@ -60,6 +66,16 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply) {
     int originalAlpha = alpha;
     uint64_t hash = board.getHash();
 
+    if (ply > 0) {
+        if (board.getHalfMoveClock() >= 100 || repetitionTable.Contains(hash)) {
+            return 0;
+        }
+
+        alpha = std::max(alpha, -MATE_SCORE + ply);
+        beta = std::min(beta, MATE_SCORE - ply);
+        if (alpha >= beta) return alpha;
+    }
+
     int ttScore;
     Move ttMove;
 
@@ -67,9 +83,6 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply) {
         board.getKingSquare(board.getSideToMove()),
         (Color)(board.getSideToMove() ^ 1));
 
-    if (ply > 0 && !inCheck && board.IsRepetition()) {
-        return 0;
-    }
 
     if (inCheck)
         depth++;
@@ -86,11 +99,11 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply) {
         Color us = board.getSideToMove();
 
         bool hasBigPiece =
-            board.getPieceBitboard(us, QUEEN) ||
+            board.getPieceBitboard(us, QUEEN) |
             board.getPieceBitboard(us, ROOK);
 
         bool hasMinor =
-            board.getPieceBitboard(us, BISHOP) ||
+            board.getPieceBitboard(us, BISHOP) |
             board.getPieceBitboard(us, KNIGHT);
 
         bool zugzwangRisk =
@@ -118,42 +131,64 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply) {
             board,
             moves,
             ttMove,
+            killerMoves,
+            ply,
             historyMoves
         );
+    }
+
+    if (ply > 0) {
+        bool was_pawn_move = board.getPieceAt(prevMove.getTo(), (Color)(board.getSideToMove() ^ 1)) == PAWN;
+        repetitionTable.Push(hash, prevWasCapture || was_pawn_move);
     }
 
     Move bestMove;
     int legalMoves = 0;
 
     for (const Move& m : moves) {
-        if (!board.MakeMove(m))
-            continue;
 
-        legalMoves++;
-
-        int score;
         bool quiet =
             !(m.getFlags() & CAPTURE_FLAG) &&
             !(m.getFlags() & PROMOTION_FLAG);
 
-        if (depth >= 3 && legalMoves > 3 && quiet && !inCheck) {
-            score = -negamax(depth - 3, -alpha - 1, -alpha, ply + 1);
+		bool is_capture = m.getFlags() & CAPTURE_FLAG;
+
+        if (!board.MakeMove(m, true))
+            continue;
+
+        legalMoves++;
+
+        bool inCheckAfterMove = board.isSquareAttacked(
+            board.getKingSquare(board.getSideToMove()),
+            (Color)(board.getSideToMove() ^ 1));
+
+        int score;
+
+        if (depth >= 3 && legalMoves > 3 && quiet && !inCheckAfterMove) {
+            score = -negamax(depth - 2, -alpha - 1, -alpha, ply + 1, m, is_capture);
             if (score > alpha)
-                score = -negamax(depth - 1, -beta, -alpha, ply + 1);
+                score = -negamax(depth - 1, -beta, -alpha, ply + 1, m, is_capture);
         }
         else {
-            score = -negamax(depth - 1, -beta, -alpha, ply + 1);
+            score = -negamax(depth - 1, -beta, -alpha, ply + 1, m, is_capture);
         }
 
-        board.UndoMove(m);
-        if (stop)
+        board.UndoMove(m, true);
+        if (stop) {
+            if (ply > 0) repetitionTable.TryPop();
             return alpha;
+        }
 
         if (score >= beta && ply < MAX_KILLER_HISTORY) {
             if (quiet) {
                 historyMoves[board.getSideToMove()][m.getFrom()][m.getTo()] += depth * depth;
+                killerMoves[ply][1] = killerMoves[ply][0];
+                killerMoves[ply][0] = m;
             }
-            tt.Store(hash, ScoreToTT(beta, ply), depth, BETA, m);
+            if (ply > 0) {
+				repetitionTable.TryPop();
+            }
+            tt.Store(hash, ScoreToTT(beta, ply), depth, TT_BETA, m);
             return beta;
         }
 
@@ -170,15 +205,19 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply) {
             hash,
             ScoreToTT(score, ply),
             depth,
-            EXACT,
+            TT_EXACT,
             Move()
         );
 
         return score;
     }
 
-    TTFlag flag = (alpha <= originalAlpha) ? ALPHA : EXACT;
+    TTFlag flag = (alpha <= originalAlpha) ? TT_ALPHA : TT_EXACT;
     tt.Store(hash, ScoreToTT(alpha, ply), depth, flag, bestMove);
+
+	if (ply > 0) {
+        repetitionTable.TryPop();
+	}
 
     return alpha;
 }
@@ -197,13 +236,22 @@ void Searcher::AgeHistory() {
                 historyMoves[c][f][t] >>= 1;
 }
 
+void Searcher::ClearKillers() {
+    for (int i = 0; i < MAX_PLY; i++) {
+        killerMoves[i][0] = Move();
+        killerMoves[i][1] = Move();
+    }
+
+}
+
 Move Searcher::IterativeDeepening() {
     startTime = now_ms();
     stop = false;
     nodes = 0;
     AgeHistory();
+    ClearKillers();
 
-    board.getRepetitionTable().Init(board);
+    repetitionTable.Init(board);
 
     Move bestMove;
     int lastScore = 0;
@@ -238,7 +286,7 @@ Move Searcher::IterativeDeepening() {
         if (tmpMove.isValid()) {
             bestMove = tmpMove;
         }
-        
+
         if (stop) break;
 
         lastScore = score;

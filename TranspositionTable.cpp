@@ -1,6 +1,7 @@
 #include "TranspositionTable.h"
 
 TranspositionTable::TranspositionTable(size_t mb) {
+
     size_t entryCount = (mb * 1024 * 1024) / sizeof(TTEntry);
     table.resize(entryCount);
     Clear();
@@ -10,14 +11,14 @@ void TranspositionTable::Store(uint64_t hash, int score, int depth, TTFlag flag,
     size_t index = (hash ^ (hash >> 32)) % table.size();
     TTEntry& e = table[index];
 
-    if (e.hash == 0 ||
-        e.depth < depth ||
-        (e.depth == depth && flag == EXACT)) {
-        e.hash = hash;
-        e.score = score;
-        e.depth = depth;
-        e.flag = flag;
-        e.bestMove = bestMove;
+    if (e.key == 0 || e.depth >= depth || generation != e.gen) {
+        e.key = hash;
+        e.score = (int32_t)score;
+        e.depth = (int8_t)depth;
+        e.type = (uint8_t)flag;
+        e.gen = generation;
+        e.moveValue = bestMove.getMoveData();
+        e.movePieceType = bestMove.getPieceType();
     }
 }
 
@@ -25,26 +26,26 @@ bool TranspositionTable::Probe(uint64_t hash, int depth, int alpha, int beta, in
     size_t index = (hash ^ (hash >> 32)) % table.size();
     TTEntry& e = table[index];
 
-    if (e.hash != hash)
+    if (e.key != hash)
         return false;
 
-    bestMove = e.bestMove;
+    bestMove = Move(e.moveValue, e.movePieceType);
 
     if (e.depth < depth)
         return false;
 
-    if (e.flag == EXACT) {
+    if (e.type == TT_EXACT) {
         score = e.score;
         return true;
     }
 
-    if (e.flag == ALPHA && e.score <= alpha) {
-        score = e.score;
+    if (e.type == TT_ALPHA && e.score <= alpha) {
+        score = alpha;
         return true;
     }
 
-    if (e.flag == BETA && e.score >= beta) {
-        score = e.score;
+    if (e.type == TT_BETA && e.score >= beta) {
+        score = beta;
         return true;
     }
 
@@ -52,11 +53,6 @@ bool TranspositionTable::Probe(uint64_t hash, int depth, int alpha, int beta, in
 }
 
 void TranspositionTable::Clear() {
-    for (auto& e : table) {
-        e.hash = 0;
-        e.depth = 0;
-        e.flag = EXACT;
-        e.score = 0;
-        e.bestMove = Move();
-    }
+    for (auto& e : table) e.key = 0;
+    generation = 0;
 }

@@ -2,6 +2,20 @@
 #include "BoardManager.h"
 #include "UCIParsing.h"
 
+#include <sstream>
+
+std::vector<std::string> tokenize(const std::string& input) {
+    std::vector<std::string> tokens;
+    std::istringstream iss(input);
+    std::string token;
+
+    while (iss >> token) {
+        tokens.push_back(token);
+    }
+    return tokens;
+}
+
+
 void BoardManager::goPerft(int perftDepth) {
 
     std::cout << "Perft(" << perftDepth << ") inditasa..." << std::endl;
@@ -45,13 +59,8 @@ void BoardManager::startGameLoop() {
 
     while (true) {
 
-        if (board.IsRepetition()) {
-           //TODO
-        }
-
         if (board.IsDraw()) {
-            std::cout << "Dontetlen!" << std::endl;
-            break;
+            
         }
 
         if (board.IsCheckMate()) {
@@ -63,13 +72,9 @@ void BoardManager::startGameLoop() {
             MakeRobotMove();
 
         else {
-            if (board.IsRepetition()) {
-                //TODO
-            }
 
             if (board.IsDraw()) {
-                std::cout << "Dontetlen!" << std::endl;
-                break;
+                
             }
 
             if (board.IsCheckMate()) {
@@ -86,9 +91,33 @@ void BoardManager::startGameLoop() {
         board.PrintBoard();
 
         std::cout << "Add meg a lepest (pl. e2e4): ";
-        std::cin >> userInput;
+        std::getline(std::cin >> std::ws, userInput);
 
-        if (userInput == "exit") break;
+        std::vector<std::string> trimmed = tokenize(userInput);
+
+        if (trimmed.size() == 0) {
+            continue;
+        }
+
+        if (trimmed[0] == "exit") break;
+        else if (trimmed[0] == "undo") {
+
+            int n = 0;
+
+            if (trimmed.size() == 1){ 
+                n = 1;
+            }
+            else {
+                n = trimmed[1][0] - '0';
+            }
+            for (int i = 0; i < n; ++i) {
+                if (board.getPly() > 0)
+                    board.UndoMove(board.getLastMove());
+            }
+
+            board.PrintBoard();
+            continue;
+        }
 
         Move move = UCIParsing::Parse(userInput, board);
 

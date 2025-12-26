@@ -11,7 +11,7 @@ private:
     Board& board;
     TranspositionTable tt;
 
-    int negamax(int depth, int alpha, int beta, int ply);
+    int negamax(int depth, int alpha, int beta, int ply, const Move& prevMove = Move(), bool prevWasCapture = false);
     int quiescence(int alpha, int beta);
 
     const int max_depth = 64;
@@ -21,16 +21,19 @@ private:
     std::atomic<bool> stop;
     std::atomic<uint64_t> nodes;
 
+	RepetitionTable repetitionTable;
+
     int historyMoves[2][64][64];
-    Move killerMoves[2][64];
+    Move killerMoves[MAX_PLY][2];
 
 	const int MATE_SCORE = 100000;
+    const int MATE_THRESHOLD = 90000;
 
     void ClearHistory();
     void AgeHistory();
 
 public:
-    Searcher(Board& board) : board(board), tt(64) { 
+    Searcher(Board& board) : board(board), tt(128) { 
         ClearHistory(); 
         PrecomputedEvaluationData::Init();
     }
@@ -38,10 +41,12 @@ public:
     Move IterativeDeepening();
     Move GetBestMove();
 
-    inline bool IsMateScore(int score) {
-        return std::abs(score) >= MATE_SCORE - 1000;
-    }
-
     inline int ScoreToTT(int score, int ply);
 	inline int ScoreFromTT(int score, int ply);
+
+    inline bool IsMateScore(int score) {
+        return std::abs(score) > MATE_THRESHOLD;
+	}
+
+	void ClearKillers();
 };
