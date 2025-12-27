@@ -33,7 +33,7 @@ private:
 
     Color m_side_to_move = WHITE;
 
-	std::vector<uint64_t> repetition_history;
+	RepetitionTable repetition_history;
     std::vector<Move> move_history;
 
     static uint64_t pawn_attacks_table[2][64];
@@ -111,7 +111,7 @@ public:
         return boardStateHistory[i == -1 ? m_ply : i].zobrist_hash;
     }
     inline std::vector<uint64_t> getRepetitionHash() const {
-        return repetition_history;
+        return repetition_history.getHashes();
 	}
     inline uint16_t getPly() const {
         return m_ply;

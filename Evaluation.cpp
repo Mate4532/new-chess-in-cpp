@@ -43,21 +43,21 @@ int Evaluation::EvaluateMobility(const Board& board, Color color) {
     while (bishops) {
         Square sq = PopBit(bishops);
         uint64_t attacks = board.getBishopAttacks(sq, occupied);
-        mobilityScore += std::popcount(attacks);
+        mobilityScore += std::popcount(attacks) * 3;
     }
 
     uint64_t rooks = board.getPieceBitboard(color, ROOK);
     while (rooks) {
         Square sq = PopBit(rooks);
         uint64_t attacks = board.getRookAttacks(sq, occupied);
-        mobilityScore += std::popcount(attacks);
+        mobilityScore += std::popcount(attacks) * 4;
     }
 
     uint64_t queens = board.getPieceBitboard(color, QUEEN);
     while (queens) {
         Square sq = PopBit(queens);
         uint64_t attacks = board.getBishopAttacks(sq, occupied) | board.getRookAttacks(sq, occupied);
-        mobilityScore += std::popcount(attacks) / 2;
+        mobilityScore += std::popcount(attacks) * 2;
     }
 
     return mobilityScore;
@@ -126,7 +126,7 @@ int Evaluation::EvaluatePawns(const Board& board, Color color) {
 
             uint64_t defenders = board.getPawnAttacks(sq, (Color)(color ^ 1));
             if (defenders & pawns) {
-                score += 10;
+                score += 6;
             }
         }
         else {
@@ -242,7 +242,6 @@ int Evaluation::RookBlockPenalty(const Board& board, Color color) {
 int Evaluation::EvaluatePos(const Board& board) {
     int mg[2] = { 0,0 };
     int eg[2] = { 0,0 };
-    int pstOnly[2] = { 0,0 };
     int phase = 0;
 
     int pieceCounts[2][6] = { {0} };
@@ -274,7 +273,6 @@ int Evaluation::EvaluatePos(const Board& board) {
 
                 mg[c] += mgpst;
                 eg[c] += egpst;
-                pstOnly[c] += mgpst;
             }
         }
     }
@@ -291,12 +289,12 @@ int Evaluation::EvaluatePos(const Board& board) {
         int myPawns = pieceCounts[c][PAWN];
         int oppPawns = pieceCounts[opp][PAWN];
 
-        if (oppMinors > myMinors && (pieceCounts[c][PAWN] - pieceCounts[opp][PAWN]) >= 3) {
+        if (oppMinors > myMinors) {
             mg[c] -= 60;
             eg[c] -= 120;
         }
 
-        if ((oppMinors - myMinors) >= 2 && (myRooks - oppRooks) <= 1 && (myPawns - oppPawns) >= 1) {
+        if ((oppMinors - myMinors) >= 2 && (myRooks - oppRooks) <= 1) {
             mg[c] -= 60;
             eg[c] -= 120;
         }
@@ -312,15 +310,13 @@ int Evaluation::EvaluatePos(const Board& board) {
 
         mg[c] += EvaluatePawnTerritory(board, (Color)c);
 
-        if (egT < 0.6f)
-            mg[c] -= EvaluateKingSafety(board, (Color)c);
+        mg[c] -= EvaluateKingSafety(board, (Color)c);
 
         mg[c] += KingPawnShield(board, (Color)c);
 
-        if (egT < 0.7f) mg[c] += EvaluatePawnCenter(board, (Color)c);
+        mg[c] += EvaluatePawnCenter(board, (Color)c);
 
-        if (egT > 0.7f && mg[c] > mg[opp] + 400)
-            eg[c] += MopUpEval(board, (Color)c);
+        if (mg[c] > mg[opp] + 200) eg[c] += MopUpEval(board, (Color)c);
 
         int mobility = EvaluateMobility(board, (Color)c);
         mg[c] += mobility;

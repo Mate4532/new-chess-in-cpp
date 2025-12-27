@@ -2,7 +2,9 @@
 #include "BoardManager.h"
 
 int main() {
-    BoardManager bm(true, false);
+    bool isWhiteRobot = false;
+    bool isBlackRobot = true;
+    BoardManager bm(isWhiteRobot, isBlackRobot);
     bm.board.PrintBoard();
 
     bm.startGameLoop();

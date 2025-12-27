@@ -233,8 +233,8 @@ void Board::LoadFEN(std::string fen) {
 
     boardStateHistory[m_ply] = state;
     boardStateHistory[m_ply].zobrist_hash = GenerateFullHash();
-
-    repetition_history.push_back(boardStateHistory[m_ply].zobrist_hash);
+    
+    repetition_history.Init(*this);
 }
 
 PieceType Board::getPieceAt(Square sq, Color color) const {
@@ -449,9 +449,6 @@ bool Board::MakeMove(Move move, bool in_search) {
     }
 
     if (piece == PAWN || (move.getFlags() & CAPTURE_FLAG)) {
-        if (!in_search) {
-			repetition_history.clear();
-        }
         newBoardState.half_move_clock = 0;
     }
 
@@ -528,7 +525,7 @@ bool Board::MakeMove(Move move, bool in_search) {
     m_side_to_move = enemy;
 
     if (!in_search) {
-		repetition_history.push_back(newHash);
+		repetition_history.Push(newHash, piece == PAWN || (move.getFlags() & CAPTURE_FLAG));
 		move_history.push_back(move);
     }
 
@@ -607,9 +604,7 @@ void Board::UndoMove(Move move, bool in_search) {
     }
 
     if (!in_search) {
-		if (repetition_history.size() > 0) {
-            repetition_history.pop_back();
-        }
+        repetition_history.TryPop();
         move_history.pop_back();
     }
 

@@ -163,9 +163,7 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, b
             inCheckBeforeMove ||
             board.isSquareAttacked(board.getKingSquare(us), enemy);
 
-        bool gives_check = board.isSquareAttacked(board.getKingSquare(us), enemy);
-
-        if (fPruning && movesSearched > 1 && !isUrgent && !gives_check) {
+        if (fPruning && movesSearched > 1 && !isUrgent) {
             board.UndoMove(m, true);
             continue;
         }
