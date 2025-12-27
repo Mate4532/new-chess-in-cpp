@@ -57,7 +57,7 @@ int Evaluation::EvaluateMobility(const Board& board, Color color) {
     while (queens) {
         Square sq = PopBit(queens);
         uint64_t attacks = board.getBishopAttacks(sq, occupied) | board.getRookAttacks(sq, occupied);
-        mobilityScore += std::popcount(attacks) * 0.5;
+        mobilityScore += std::popcount(attacks) / 2;
     }
 
     return mobilityScore;
@@ -90,18 +90,6 @@ int Evaluation::EvaluatePawnTerritory(const Board& board, Color color) {
         bonus += std::min(controlledCount * 2, 6);
     }
     return bonus;
-}
-
-int Evaluation::MaterialImbalancePenalty(PieceType lost, int pawnsGained) {
-    if (lost == KNIGHT || lost == BISHOP) {
-
-        if (pawnsGained >= 3) {
-
-            return -60;
-        }
-    }
-
-    return 0;
 }
 
 int Evaluation::EvaluatePawnCenter(const Board& board, Color color) {
@@ -296,11 +284,22 @@ int Evaluation::EvaluatePos(const Board& board) {
     for (int c = WHITE; c <= BLACK; c++) {
         int opp = c ^ 1;
 
-        if (pieceCounts[opp][KNIGHT] > pieceCounts[c][KNIGHT])
-            mg[c] += MaterialImbalancePenalty(KNIGHT, pieceCounts[c][PAWN] - pieceCounts[opp][PAWN]);
+        int myMinors = pieceCounts[c][KNIGHT] + pieceCounts[c][BISHOP];
+        int oppMinors = pieceCounts[opp][KNIGHT] + pieceCounts[opp][BISHOP];
+        int myRooks = pieceCounts[c][ROOK];
+        int oppRooks = pieceCounts[opp][ROOK];
+        int myPawns = pieceCounts[c][PAWN];
+        int oppPawns = pieceCounts[opp][PAWN];
 
-        if (pieceCounts[opp][BISHOP] > pieceCounts[c][BISHOP])
-            mg[c] += MaterialImbalancePenalty(BISHOP, pieceCounts[c][PAWN] - pieceCounts[opp][PAWN]);
+        if (oppMinors > myMinors && (pieceCounts[c][PAWN] - pieceCounts[opp][PAWN]) >= 3) {
+            mg[c] -= 60;
+            eg[c] -= 120;
+        }
+
+        if ((oppMinors - myMinors) >= 2 && (myRooks - oppRooks) <= 1 && (myPawns - oppPawns) >= 1) {
+            mg[c] -= 60;
+            eg[c] -= 120;
+        }
 
         if (pieceCounts[c][BISHOP] >= 2) {
             mg[c] += 30;
@@ -328,6 +327,13 @@ int Evaluation::EvaluatePos(const Board& board) {
         eg[c] += mobility;
 
         mg[c] += RookBlockPenalty(board, (Color)c);
+
+        uint64_t myRookBits = board.getPieceBitboard((Color)c, ROOK);
+        uint64_t seventhRank = (c == WHITE) ? RANK_7 : RANK_2;
+        if (myRookBits & seventhRank) {
+            mg[c] += 20;
+            eg[c] += 40;
+        }
     }
 
     int score = (int)(mg[WHITE] * (1.0f - egT) + eg[WHITE] * egT)

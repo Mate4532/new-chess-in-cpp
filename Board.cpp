@@ -27,7 +27,7 @@ void Board::InitializeBoard() {
     InitializeAttackTables();
     InitializeMagicTables();
 
-    LoadFEN("8/4N3/2p5/4K3/p7/k5B1/8/2r5 b - - 0 1"); //r1bqkbnr/pp3ppp/3p4/2p1p3/2BnP3/2NP1N2/PPP2PPP/R1BQK2R b KQkq - 0 1 trükküs pozi
+    LoadFEN(""); //r1bqkbnr/pp3ppp/3p4/2p1p3/2BnP3/2NP1N2/PPP2PPP/R1BQK2R b KQkq - 0 1 trükküs pozi
 }
 
 void Board::InitializeAttackTables() {

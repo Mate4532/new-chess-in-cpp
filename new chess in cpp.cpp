@@ -2,7 +2,7 @@
 #include "BoardManager.h"
 
 int main() {
-    BoardManager bm(false, true);
+    BoardManager bm(true, false);
     bm.board.PrintBoard();
 
     bm.startGameLoop();
