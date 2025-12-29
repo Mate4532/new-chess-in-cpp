@@ -15,7 +15,7 @@ private:
     int negamax(int depth, int alpha, int beta, int ply, Move prev_move = Move(), bool prev_was_capture = false);
     int quiescence(int alpha, int beta);
 
-    const int max_depth = 64;
+    const int max_depth = 128;
     const int robot_thinking_time_ms = 3000;
 
     long long startTime = 0;
@@ -23,13 +23,14 @@ private:
     std::atomic<uint64_t> nodes;
 
     int historyMoves[2][MAX_KILLER_HISTORY][MAX_KILLER_HISTORY];
-    Move killerMoves[2][MAX_KILLER_HISTORY];
+    Move killerMoves[MAX_KILLER_HISTORY][2];
 	RepetitionTable repetitionTable;
 
 	const int MATE_SCORE = 100000;
 
     void ClearHistory();
     void AgeHistory();
+    void ClearKillers();
 
 public:
     Searcher(Board& board) : board(board), tt(128) { 
@@ -40,6 +41,10 @@ public:
 
     Move IterativeDeepening();
     Move GetBestMove();
+    void PrintPvLine(int depth);
+    std::vector<Move> GetPVLine(int depth);
+    void PrintWhatIfPV(const std::vector<Move>& baseLine, Move alternativeMove, int depth);
+    std::vector<Move> GetWhatIfPV(const std::vector<Move>& baseLine, Move alternativeMove, int depth);
 
     inline bool IsMateScore(int score) {
         return std::abs(score) >= MATE_SCORE - 1000;

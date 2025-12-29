@@ -2,7 +2,7 @@
 #include "Board.h"
 #include "MoveList.h"
 
-#define MAX_KILLER_HISTORY 64
+#define MAX_KILLER_HISTORY 128
 
 class MoveOrdering {
 public:

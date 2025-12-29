@@ -97,6 +97,7 @@ public:
     static int EvaluatePawns(const Board& board, Color color);
     static int EvaluatePawnCenter(const Board& board, Color color);
     static int KingPawnShield(const Board& board, Color color);
+    static int EvaluateInvasion(const Board& board, Color color);
     static int RookBlockPenalty(const Board& board, Color color);
     static int MopUpEval(const Board& board, Color winner);
     static int EvaluateKingSafety(const Board& board, Color color);

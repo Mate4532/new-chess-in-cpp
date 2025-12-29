@@ -18,7 +18,11 @@ static const int rookWeight = 20;
 static const int queenWeight = 45;
 static const int endgameStart = 2 * knightWeight + 2 * bishopWeight + 2 * rookWeight + queenWeight;
 
+static const uint64_t whiteTerritoryMask = (RANK_1 | RANK_2 | RANK_3 | RANK_4);
+static const uint64_t blackTerritoryMask = (RANK_5 | RANK_6 | RANK_7 | RANK_8);
+
 static const uint64_t CENTER_4 = (1ULL << D4) | (1ULL << E4) | (1ULL << D5) | (1ULL << E5);
+static const uint64_t CENTER_8 = (RANK_4 | RANK_5) & (FILE_C | FILE_D | FILE_E | FILE_F);
 static const uint64_t CENTER_16 =
     (RANK_3 | RANK_4 | RANK_5 | RANK_6) &
     (FILE_C | FILE_D | FILE_E | FILE_F);
@@ -38,26 +42,27 @@ int Evaluation::GetPieceValue(PieceType p) {
 int Evaluation::EvaluateMobility(const Board& board, Color color) {
     int mobilityScore = 0;
     uint64_t occupied = board.getAllOccupancy();
+    uint64_t enemyTerritory = (color == WHITE) ? blackTerritoryMask : whiteTerritoryMask;
 
     uint64_t bishops = board.getPieceBitboard(color, BISHOP);
     while (bishops) {
         Square sq = PopBit(bishops);
         uint64_t attacks = board.getBishopAttacks(sq, occupied);
-        mobilityScore += std::popcount(attacks) * 3;
+        mobilityScore += std::popcount(attacks & enemyTerritory) * 1.5;
     }
 
     uint64_t rooks = board.getPieceBitboard(color, ROOK);
     while (rooks) {
         Square sq = PopBit(rooks);
         uint64_t attacks = board.getRookAttacks(sq, occupied);
-        mobilityScore += std::popcount(attacks) * 4;
+        mobilityScore += std::popcount(attacks & enemyTerritory) * 2;
     }
 
     uint64_t queens = board.getPieceBitboard(color, QUEEN);
     while (queens) {
         Square sq = PopBit(queens);
         uint64_t attacks = board.getBishopAttacks(sq, occupied) | board.getRookAttacks(sq, occupied);
-        mobilityScore += std::popcount(attacks) * 2;
+        mobilityScore += std::popcount(attacks & enemyTerritory);
     }
 
     return mobilityScore;
@@ -67,7 +72,7 @@ int Evaluation::EvaluatePawnTerritory(const Board& board, Color color) {
     uint64_t pawns = board.getPieceBitboard(color, PAWN);
     int bonus = 0;
 
-    uint64_t enemyTerritoryMask = (color == WHITE) ? (RANK_5 | RANK_6 | RANK_7 | RANK_8) : (RANK_4 | RANK_3 | RANK_2 | RANK_1);
+    uint64_t enemyTerritoryMask = (color == WHITE) ? blackTerritoryMask : whiteTerritoryMask;
 
     while (pawns) {
         Square sq = PopBit(pawns);
@@ -97,6 +102,7 @@ int Evaluation::EvaluatePawnCenter(const Board& board, Color color) {
     int score = 0;
 
     score += 12 * std::popcount(pawns & CENTER_4);
+	score += 8 * std::popcount(pawns & CENTER_8);
     score += 4 * std::popcount(pawns & CENTER_16);
 
     return score;
@@ -205,6 +211,32 @@ int Evaluation::KingPawnShield(const Board& board, Color color) {
     return shieldBonus;
 }
 
+int Evaluation::EvaluateInvasion(const Board& board, Color color) {
+    int penalty = 0;
+    Color enemy = (Color)(color ^ 1);
+
+    uint64_t myTerritory = (color == WHITE) ? whiteTerritoryMask : blackTerritoryMask;
+
+    uint64_t myBackyard = (color == WHITE) ? (RANK_1 | RANK_2) : (RANK_7 | RANK_8);
+
+    for (int pt = KNIGHT; pt <= QUEEN; pt++) {
+        uint64_t enemyPieces = board.getPieceBitboard(enemy, (PieceType)pt);
+        uint64_t invaders = enemyPieces & myTerritory;
+
+        while (invaders) {
+            Square sq = PopBit(invaders);
+
+            penalty += 15;
+
+            if ((1ULL << sq) & myBackyard) {
+                penalty += 20;
+            }
+        }
+    }
+
+    return penalty;
+}
+
 
 int Evaluation::MopUpEval(const Board& board, Color winner) {
 
@@ -308,6 +340,10 @@ int Evaluation::EvaluatePos(const Board& board) {
         mg[c] += pScore;
         eg[c] += pScore;
 
+        int moblityScore = EvaluateMobility(board, (Color)c);
+        mg[c] += moblityScore;
+        eg[c] += moblityScore;
+
         mg[c] += EvaluatePawnTerritory(board, (Color)c);
 
         mg[c] -= EvaluateKingSafety(board, (Color)c);
@@ -317,10 +353,6 @@ int Evaluation::EvaluatePos(const Board& board) {
         mg[c] += EvaluatePawnCenter(board, (Color)c);
 
         if (mg[c] > mg[opp] + 200) eg[c] += MopUpEval(board, (Color)c);
-
-        int mobility = EvaluateMobility(board, (Color)c);
-        mg[c] += mobility;
-        eg[c] += mobility;
 
         mg[c] += RookBlockPenalty(board, (Color)c);
 

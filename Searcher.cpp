@@ -38,6 +38,7 @@ int Searcher::quiescence(int alpha, int beta) {
     MoveOrdering::SortMoves(board, moves, Move(), historyMoves);
 
     for (const Move& m : moves) {
+
         if (!board.MakeMove(m, true)) continue;
         int score = -quiescence(-beta, -alpha);
         board.UndoMove(m, true);
@@ -83,50 +84,11 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, b
         board.getKingSquare(board.getSideToMove()),
         (Color)(board.getSideToMove() ^ 1));
 
-
-    bool fPruning = false;
-    if (depth <= 6 && !inCheckBeforeMove && std::abs(alpha) < 90000) {
-        int eval = Evaluation::EvaluatePos(board);
-        int margin = 120 * depth;
-        if (eval + margin <= alpha) {
-            fPruning = true;
-        }
-    }
-
-
     if (inCheckBeforeMove)
         depth++;
 
     if (depth <= 0)
         return quiescence(alpha, beta);
-
-    if (depth >= 4 && !inCheckBeforeMove && ply > 0) {
-
-        Color us = board.getSideToMove();
-
-        bool hasBigPiece =
-            board.getPieceBitboard(us, QUEEN) ||
-            board.getPieceBitboard(us, ROOK);
-
-        bool hasMinor =
-            board.getPieceBitboard(us, BISHOP) ||
-            board.getPieceBitboard(us, KNIGHT);
-
-        bool zugzwangRisk =
-            !hasBigPiece &&
-            board.getPieceBitboard(us, PAWN);
-
-        if ((hasBigPiece || hasMinor) && !zugzwangRisk) {
-
-            board.MakeNullMove();
-            int r = 2 + depth / 6;
-            int score = -negamax(depth - 1 - r, -beta, -beta + 1, ply + 1);
-            board.UndoNullMove();
-
-            if (score >= beta)
-                return beta;
-        }
-    }
 
     MoveList moves;
     MoveGenerator::GenerateMoves(board, moves);
@@ -163,9 +125,11 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, b
             inCheckBeforeMove ||
             board.isSquareAttacked(board.getKingSquare(us), enemy);
 
-        if (fPruning && movesSearched > 1 && !isUrgent) {
-            board.UndoMove(m, true);
-            continue;
+        if (depth <= 4 && !inCheckBeforeMove && movesSearched > 3) {
+            if (!isUrgent) {
+                board.UndoMove(m, true);
+                continue;
+            }
         }
 
         bool isCapture = m.getFlags() & CAPTURE_FLAG;
@@ -175,10 +139,6 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, b
 
         int score;
         int reduction = LMR::GetReduction(depth, movesSearched);
-        if (historyMoves[us][m.getFrom()][m.getTo()] > 5000) reduction -= 1;
-        if (historyMoves[us][m.getFrom()][m.getTo()] < -1000) reduction += 1;
-
-        if (fPruning) reduction += 1;
 
         bool doLMR = (depth >= 3 && movesSearched > 3);
 
@@ -186,15 +146,10 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, b
             score = -negamax(depth - 1, -beta, -alpha, ply + 1, m, isCapture);
         }
         else {
-            int r = (doLMR && !isUrgent) ? reduction : 0;
 
-            score = -negamax(depth - 1 - r, -alpha - 1, -alpha, ply + 1, m, isCapture);
+            score = -negamax(depth - 1 - reduction, -alpha - 1, -alpha, ply + 1, m, isCapture);
 
-            if (r > 0 && score > alpha) {
-                score = -negamax(depth - 1, -alpha - 1, -alpha, ply + 1, m, isCapture);
-            }
-
-            if (score > alpha && score < beta) {
+            if (score > alpha) {
                 score = -negamax(depth - 1, -beta, -alpha, ply + 1, m, isCapture);
             }
         }
@@ -205,6 +160,10 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, b
 
         if (score >= beta) {
             if (quiet) {
+                if (!(m.getMoveData() == killerMoves[ply][0].getMoveData())) {
+                    killerMoves[ply][1] = killerMoves[ply][0];
+                    killerMoves[ply][0] = m;
+                }
                 historyMoves[board.getSideToMove()][m.getFrom()][m.getTo()] += depth * depth;
             }
             if (ply > 0) {
@@ -235,6 +194,13 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, b
     return alpha;
 }
 
+void Searcher::ClearKillers() {
+    for (int i = 0; i < MAX_KILLER_HISTORY; i++) {
+        killerMoves[i][0] = Move();
+        killerMoves[i][1] = Move();
+    }
+}
+
 void Searcher::ClearHistory() {
     for (int c = 0; c < 2; c++)
         for (int f = 0; f < 64; f++)
@@ -257,6 +223,7 @@ Move Searcher::IterativeDeepening() {
 	repetitionTable.Init(board);
     tt.NewWrite();
     AgeHistory();
+	ClearKillers();
 
     int rawScore;
     Move tmpMove;
@@ -316,7 +283,120 @@ Move Searcher::IterativeDeepening() {
         << (board.getSideToMove() == WHITE ? lastScore : -lastScore)
         << std::endl;
 
+    std::vector<Move> baseLine = GetPVLine(50);
+    PrintPvLine(50);
+
     return bestMove;
+}
+
+void Searcher::PrintPvLine(int depth) {
+
+    std::vector<Move> pvLine = GetPVLine(depth);
+
+    for (int i = 0; i < pvLine.size(); ++i) {
+        const Move& m = pvLine[i];
+        std::cout << m.toAlgebraic() << (i != pvLine.size() - 1 ? " -> " : "");
+    }
+
+    std::cout << std::endl;
+}
+
+std::vector<Move> Searcher::GetPVLine(int depth) {
+    std::vector<Move> pvLine;
+    uint64_t currentHash = board.getHash();
+
+    for (int i = 0; i < depth; i++) {
+        int ttScore;
+        Move ttMove;
+        TTFlag flag;
+
+        if (tt.Probe(currentHash, 0, -MATE_SCORE, MATE_SCORE, ttScore, ttMove)) {
+            if (ttMove.isValid()) {
+
+                if (board.MakeMove(ttMove, true)) {
+                    pvLine.push_back(ttMove);
+                    currentHash = board.getHash();
+                }
+                else {
+                    break;
+                }
+            }
+            else {
+                break;
+            }
+        }
+        else {
+            break;
+        }
+    }
+
+    for (int i = (int)pvLine.size() - 1; i >= 0; i--) {
+        board.UndoMove(pvLine[i], true);
+    }
+
+    return pvLine;
+}
+
+void Searcher::PrintWhatIfPV(const std::vector<Move>& baseLine, Move alternativeMove, int depth) {
+
+    std::vector<Move> pvLine = GetWhatIfPV(baseLine, alternativeMove, depth);
+
+    for (int i = 0; i < pvLine.size(); ++i) {
+        const Move& m = pvLine[i];
+        std::cout << m.toAlgebraic() << (i != pvLine.size() - 1 ? " -> " : "");
+    }
+
+    std::cout << std::endl;
+}
+
+std::vector<Move> Searcher::GetWhatIfPV(const std::vector<Move>& baseLine, Move alternativeMove, int depth) {
+    std::vector<Move> fullHistory;
+    std::vector<Move> resultPV;
+
+    for (const Move& m : baseLine) {
+        if (board.MakeMove(m, true)) {
+            fullHistory.push_back(m);
+        }
+        else {
+            for (int i = (int)fullHistory.size() - 1; i >= 0; i--) board.UndoMove(fullHistory[i], true);
+            return {};
+        }
+    }
+
+    if (!board.MakeMove(alternativeMove, true)) {
+        for (int i = (int)fullHistory.size() - 1; i >= 0; i--) board.UndoMove(fullHistory[i], true);
+        return {};
+    }
+    fullHistory.push_back(alternativeMove);
+    resultPV.push_back(alternativeMove);
+    board.PrintBoard();
+
+    uint64_t currentHash = board.getHash();
+
+    for (int i = 0; i < depth; i++) {
+        int ttScore;
+        Move ttMove;
+
+        if (tt.Probe(currentHash, 0, -MATE_SCORE, MATE_SCORE, ttScore, ttMove)) {
+            if (board.MakeMove(ttMove, true)) {
+                resultPV.push_back(ttMove);
+                fullHistory.push_back(ttMove);
+                currentHash = board.getHash();
+            }
+            else {
+                break;
+            }
+        }
+        else {
+            break;
+        }
+    }
+
+    for (int i = (int)fullHistory.size() - 1; i >= 0; i--) {
+        board.UndoMove(fullHistory[i], true);
+    }
+
+    return resultPV;
 }
 
 Move Searcher::GetBestMove() {
