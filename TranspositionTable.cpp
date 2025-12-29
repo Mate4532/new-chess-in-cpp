@@ -9,10 +9,10 @@ TranspositionTable::TranspositionTable(size_t mb) {
 }
 
 void TranspositionTable::Store(uint64_t hash, int score, int depth, TTFlag flag, Move bestMove) {
-    size_t index = (hash ^ (hash >> 32)) % table.size();
+    size_t index = hash % table.size();
     TTEntry& e = table[index];
 
-    if (e.key == 0 || e.gen != generation || depth >= e.depth) {
+    if (e.key == 0 || e.gen != generation || (depth >= e.depth && e.key == hash)) {
         e.key = hash;
         e.score = (int32_t)score;
         e.depth = (int8_t)depth;
@@ -27,7 +27,7 @@ void TranspositionTable::Store(uint64_t hash, int score, int depth, TTFlag flag,
 }
 
 bool TranspositionTable::Probe(uint64_t hash, int depth, int alpha, int beta, int& score, Move& bestMove) {
-    size_t index = (hash ^ (hash >> 32)) % table.size();
+    size_t index = hash % table.size();
     TTEntry& e = table[index];
 
     if (e.key != hash)
@@ -55,6 +55,14 @@ bool TranspositionTable::Probe(uint64_t hash, int depth, int alpha, int beta, in
 }
 
 void TranspositionTable::Clear() {
-    for (auto& e : table) e.key = 0;
+    for (auto& e : table) {
+        e.key = 0;
+        e.score = 0;
+        e.moveValue = 0;
+        e.movePieceType = 0;
+        e.depth = 0;
+        e.type = 0;
+        e.gen = 0;
+    }
     generation = 0;
 }

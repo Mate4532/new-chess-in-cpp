@@ -1,7 +1,7 @@
-﻿  Searcher.cpp
-D:\projects\Visual Studio projects\new-chess-in-cpp\Searcher.cpp(311,16): warning C4101: 'flag': unreferenced local variable
+﻿  Evaluation.cpp
+D:\projects\Visual Studio projects\new-chess-in-cpp\Evaluation.cpp(49,66): warning C4244: '+=': conversion from 'double' to 'int', possible loss of data
   Generating code
-  2 of 678 functions ( 0.3%) were compiled, the rest were copied from previous compilation.
+  1 of 678 functions ( 0.1%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
     7 functions had inline decision re-evaluated but remain unchanged
   Finished generating code

@@ -46,9 +46,15 @@ void BoardManager::printBestMove() {
 }
 
 void BoardManager::MakeRobotMove() {
-
+	uint64_t hash_before = board.getHash();
+    std::cout << "Hash kereses elott: " << board.getHash() << std::endl;
     Move best_move = searcher.GetBestMove();
 
+    uint64_t hash_after = board.getHash();
+    std::cout << "Hash kereses utan: " << board.getHash() << std::endl;
+    if (hash_before != hash_after) {
+		std::cout << "BAJ VAN\n\n\n\n\n" << std::endl;
+    }
     board.MakeMove(best_move);
     std::cout << "Robot lepese: " + best_move.toAlgebraic() << std::endl;
 }
@@ -68,8 +74,9 @@ void BoardManager::startGameLoop() {
             break;
         }
 
-        if ((board.getSideToMove() == WHITE && is_white_robot) || (board.getSideToMove() == BLACK && is_black_robot))
+        if ((board.getSideToMove() == WHITE && is_white_robot) || (board.getSideToMove() == BLACK && is_black_robot)) {
             MakeRobotMove();
+        }
 
         else {
 

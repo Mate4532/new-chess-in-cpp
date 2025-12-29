@@ -125,13 +125,6 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, b
             inCheckBeforeMove ||
             board.isSquareAttacked(board.getKingSquare(us), enemy);
 
-        if (depth <= 4 && !inCheckBeforeMove && movesSearched > 3) {
-            if (!isUrgent) {
-                board.UndoMove(m, true);
-                continue;
-            }
-        }
-
         bool isCapture = m.getFlags() & CAPTURE_FLAG;
         bool quiet =
             !(isCapture) &&
@@ -142,7 +135,7 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, b
 
         bool doLMR = (depth >= 3 && movesSearched > 3);
 
-        if (movesSearched == 1) {
+        if (movesSearched <= 2) {
             score = -negamax(depth - 1, -beta, -alpha, ply + 1, m, isCapture);
         }
         else {
@@ -160,17 +153,13 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, b
 
         if (score >= beta) {
             if (quiet) {
-                if (!(m.getMoveData() == killerMoves[ply][0].getMoveData())) {
-                    killerMoves[ply][1] = killerMoves[ply][0];
-                    killerMoves[ply][0] = m;
-                }
                 historyMoves[board.getSideToMove()][m.getFrom()][m.getTo()] += depth * depth;
             }
             if (ply > 0) {
 				repetitionTable.TryPop();
             }
-            tt.Store(hash, ScoreToTT(score, ply), depth, TT_BETA, m);
-            return score;
+            tt.Store(hash, ScoreToTT(beta, ply), depth, TT_BETA, m);
+            return beta;
         }
 
         if (score > alpha) {
@@ -194,24 +183,17 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, b
     return alpha;
 }
 
-void Searcher::ClearKillers() {
-    for (int i = 0; i < MAX_KILLER_HISTORY; i++) {
-        killerMoves[i][0] = Move();
-        killerMoves[i][1] = Move();
-    }
-}
-
 void Searcher::ClearHistory() {
     for (int c = 0; c < 2; c++)
-        for (int f = 0; f < 64; f++)
-            for (int t = 0; t < 64; t++)
+        for (int f = 0; f < MAX_KILLER_HISTORY; f++)
+            for (int t = 0; t < MAX_KILLER_HISTORY; t++)
                 historyMoves[c][f][t] = 0;
 }
 
 void Searcher::AgeHistory() {
     for (int c = 0; c < 2; c++)
-        for (int f = 0; f < 64; f++)
-            for (int t = 0; t < 64; t++)
+        for (int f = 0; f < MAX_KILLER_HISTORY; f++)
+            for (int t = 0; t < MAX_KILLER_HISTORY; t++)
                 historyMoves[c][f][t] >>= 1;
 }
 
@@ -221,9 +203,8 @@ Move Searcher::IterativeDeepening() {
     nodes = 0;
 
 	repetitionTable.Init(board);
-    tt.NewWrite();
+	tt.NewWrite();
     AgeHistory();
-	ClearKillers();
 
     int rawScore;
     Move tmpMove;
