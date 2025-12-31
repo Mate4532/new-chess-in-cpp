@@ -8,8 +8,7 @@ enum TTFlag : uint8_t { TT_NONE, TT_EXACT, TT_ALPHA, TT_BETA };
 struct TTEntry {
     uint64_t key;
     int32_t  score;
-    uint16_t moveValue;
-    uint8_t  movePieceType;
+    Move move;
     int8_t   depth;
     uint8_t  type;
     uint8_t  gen;

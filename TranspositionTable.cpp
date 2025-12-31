@@ -9,10 +9,10 @@ TranspositionTable::TranspositionTable(size_t mb) {
 }
 
 void TranspositionTable::Store(uint64_t hash, int score, int depth, TTFlag flag, Move bestMove) {
-    size_t index = hash % table.size();
+    size_t index = (hash ^ (hash >> 32)) % table.size();
     TTEntry& e = table[index];
 
-    if (e.key == 0 || e.gen != generation || (depth >= e.depth && e.key == hash)) {
+    if (e.key == 0 || e.gen != generation || depth >= e.depth) {
         e.key = hash;
         e.score = (int32_t)score;
         e.depth = (int8_t)depth;
@@ -20,20 +20,19 @@ void TranspositionTable::Store(uint64_t hash, int score, int depth, TTFlag flag,
         e.gen = generation;
 
         if (bestMove.isValid()) {
-            e.moveValue = bestMove.getMoveData();
-            e.movePieceType = bestMove.getPieceType();
+            e.move = bestMove;
         }
     }
 }
 
 bool TranspositionTable::Probe(uint64_t hash, int depth, int alpha, int beta, int& score, Move& bestMove) {
-    size_t index = hash % table.size();
+    size_t index = (hash ^ (hash >> 32)) % table.size();
     TTEntry& e = table[index];
 
-    if (e.key != hash)
+	if (e.key != hash)
         return false;
 
-    bestMove = Move(e.moveValue, e.movePieceType);
+	bestMove = e.move;
 
     if (e.depth >= depth) {
         if (e.type == TT_EXACT) {
@@ -58,8 +57,7 @@ void TranspositionTable::Clear() {
     for (auto& e : table) {
         e.key = 0;
         e.score = 0;
-        e.moveValue = 0;
-        e.movePieceType = 0;
+		e.move = Move();
         e.depth = 0;
         e.type = 0;
         e.gen = 0;

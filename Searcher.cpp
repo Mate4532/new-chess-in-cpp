@@ -35,7 +35,8 @@ int Searcher::quiescence(int alpha, int beta) {
     MoveList moves;
     MoveGenerator::GenerateMoves(board, moves, true);
 
-    MoveOrdering::SortMoves(board, moves, Move(), historyMoves);
+    Move dummyKillers[2] = { Move(), Move() };
+    MoveOrdering::SortMoves(board, moves, Move(), historyMoves, dummyKillers);
 
     for (const Move& m : moves) {
 
@@ -65,12 +66,6 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, b
         if (board.getHalfMoveClock() >= 100 || repetitionTable.Contains(hash)) {
             return 0;
         }
-
-		alpha = std::max(alpha, -MATE_SCORE + ply);
-		beta = std::min(beta, MATE_SCORE - ply);
-		if (alpha >= beta) {
-            return alpha;
-        }
     }
 
     int ttScore;
@@ -93,13 +88,20 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, b
     MoveList moves;
     MoveGenerator::GenerateMoves(board, moves);
 
+    int important_move = 0;
+
     if (ply < MAX_KILLER_HISTORY) {
 
-        MoveOrdering::SortMoves(
+        Move currentKillers[2] = { Move(), Move() };
+        currentKillers[0] = killerMoves[ply][0];
+        currentKillers[1] = killerMoves[ply][1];
+
+        important_move = MoveOrdering::SortMoves(
             board,
             moves,
             ttMove,
-            historyMoves
+            historyMoves,
+            currentKillers
         );
     }
 
@@ -115,8 +117,8 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, b
         if (!board.MakeMove(m, true)) {
             continue;
         }
-
         movesSearched++;
+
         Color us = board.getSideToMove();
         Color enemy = (Color)(us ^ 1);
 
@@ -131,15 +133,12 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, b
             !(m.getFlags() & PROMOTION_FLAG);
 
         int score;
-        int reduction = LMR::GetReduction(depth, movesSearched);
+        int reduction = LMR::GetReduction(depth, movesSearched - important_move);
 
-        bool doLMR = (depth >= 3 && movesSearched > 3);
-
-        if (movesSearched <= 2) {
+        if (movesSearched <= important_move || historyMoves[us][m.getFrom()][m.getTo()] > 5000) {
             score = -negamax(depth - 1, -beta, -alpha, ply + 1, m, isCapture);
         }
         else {
-
             score = -negamax(depth - 1 - reduction, -alpha - 1, -alpha, ply + 1, m, isCapture);
 
             if (score > alpha) {
@@ -153,6 +152,10 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, b
 
         if (score >= beta) {
             if (quiet) {
+                if (ply < MAX_KILLER_HISTORY && m.isValid() && m.getMoveData() != killerMoves[ply][0].getMoveData()) {
+                    killerMoves[ply][1] = killerMoves[ply][0];
+                    killerMoves[ply][0] = m;
+                }
                 historyMoves[board.getSideToMove()][m.getFrom()][m.getTo()] += depth * depth;
             }
             if (ply > 0) {
@@ -197,14 +200,22 @@ void Searcher::AgeHistory() {
                 historyMoves[c][f][t] >>= 1;
 }
 
+void Searcher::ClearKillers() {
+    for (int i = 0; i < MAX_KILLER_HISTORY; i++) {
+        killerMoves[i][0] = Move();
+        killerMoves[i][1] = Move();
+    }
+}
+
 Move Searcher::IterativeDeepening() {
     startTime = now_ms();
     stop = false;
     nodes = 0;
 
 	repetitionTable.Init(board);
-	tt.NewWrite();
     AgeHistory();
+    ClearKillers();
+    tt.NewWrite();
 
     int rawScore;
     Move tmpMove;

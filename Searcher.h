@@ -23,13 +23,14 @@ private:
     std::atomic<uint64_t> nodes;
 
     int historyMoves[2][MAX_KILLER_HISTORY][MAX_KILLER_HISTORY];
-    Move killerMoves[2][MAX_KILLER_HISTORY];
+    Move killerMoves[MAX_KILLER_HISTORY][2];
 	RepetitionTable repetitionTable;
 
 	const int MATE_SCORE = 100000;
 
     void ClearHistory();
     void AgeHistory();
+    void ClearKillers();
 
 public:
     Searcher(Board& board) : board(board), tt(128) { 

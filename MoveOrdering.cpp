@@ -5,14 +5,13 @@ static inline int ScoreMove(
     const Board& board,
     const Move& m,
     const Move& ttMove,
-    const int history[2][MAX_KILLER_HISTORY][MAX_KILLER_HISTORY]
+    const int history[2][MAX_KILLER_HISTORY][MAX_KILLER_HISTORY],
+    const Move killers[2]
 ) {
     Color us = board.getSideToMove();
     Color enemy = (Color)(us ^ 1);
 
-    if (m.getFrom() == ttMove.getFrom() &&
-        m.getTo() == ttMove.getTo() &&
-        m.getFlags() == ttMove.getFlags())
+    if (m.isValid() && ttMove.isValid() && m.getMoveData() == ttMove.getMoveData())
         return 10'000'000;
 
     if (m.getFlags() & CAPTURE_FLAG) {
@@ -32,16 +31,22 @@ static inline int ScoreMove(
         return 3'000'000;
     }
 
+    if (m.isValid()) {
+        if (m.getMoveData() == killers[0].getMoveData()) return 2'000'000;
+        if (m.getMoveData() == killers[1].getMoveData()) return 1'500'000;
+    }
     return history[us][m.getFrom()][m.getTo()];
 }
 
-void MoveOrdering::SortMoves(
+int MoveOrdering::SortMoves(
     const Board& board,
     MoveList& moves,
     Move ttMove,
-    const int history[2][MAX_KILLER_HISTORY][MAX_KILLER_HISTORY]
+    const int history[2][MAX_KILLER_HISTORY][MAX_KILLER_HISTORY],
+    const Move killers[2]
 ) {
     int scores[256];
+    int counter = 0;
 
     int n = (int)moves.size();
     for (int i = 0; i < n; i++) {
@@ -49,8 +54,10 @@ void MoveOrdering::SortMoves(
             board,
             moves[i],
             ttMove,
-            history
+            history,
+            killers
         );
+		if (scores[i] >= 1'500'000) counter++;
     }
 
     for (int i = 0; i < n - 1; i++) {
@@ -64,4 +71,5 @@ void MoveOrdering::SortMoves(
             std::swap(moves[i], moves[best]);
         }
     }
+	return counter;
 }
