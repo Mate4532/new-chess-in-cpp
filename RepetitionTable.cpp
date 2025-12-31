@@ -1,8 +1,6 @@
 #include "RepetitionTable.h"
 #include "Board.h"
 
-
-
 void RepetitionTable::Init(const Board& board) {
 
 	std::vector<uint64_t> repetition_hashes = board.getRepetitionHash();

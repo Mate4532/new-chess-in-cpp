@@ -1,2 +1,3 @@
-﻿  Evaluation.cpp
+﻿  Searcher.cpp
+D:\projects\Visual Studio projects\new-chess-in-cpp\Searcher.cpp(305,16): warning C4101: 'flag': unreferenced local variable
   new chess in cpp.vcxproj -> D:\projects\Visual Studio projects\new-chess-in-cpp\x64\Debug\new chess in cpp.exe

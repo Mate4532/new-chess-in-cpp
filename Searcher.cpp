@@ -110,6 +110,8 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, b
 		repetitionTable.Push(hash, was_pawn_move || prev_was_capture);
     }
 
+	important_move = std::max(important_move, 3);
+
     Move bestMove;
     int movesSearched = 0;
 
@@ -135,7 +137,7 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, b
         int score;
         int reduction = LMR::GetReduction(depth, movesSearched - important_move);
 
-        if (movesSearched <= important_move) {
+        if (depth < 3 && movesSearched <= important_move) {
             score = -negamax(depth - 1, -beta, -alpha, ply + 1, m, isCapture);
         }
         else {

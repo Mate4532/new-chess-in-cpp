@@ -42,10 +42,19 @@ int Evaluation::EvaluateMobility(const Board& board, Color color) {
     uint64_t occupied = board.getAllOccupancy();
     uint64_t enemyTerritory = (color == WHITE) ? blackTerritoryMask : whiteTerritoryMask;
 
+    uint64_t knights = board.getPieceBitboard(color, KNIGHT);
+    while (knights) {
+        Square sq = PopBit(knights);
+        uint64_t attacks = board.getKnightAttacks(sq);
+        mobilityScore += std::popcount(attacks & ~enemyTerritory);
+        mobilityScore += std::popcount(attacks & enemyTerritory) * 2;
+    }
+
     uint64_t bishops = board.getPieceBitboard(color, BISHOP);
     while (bishops) {
         Square sq = PopBit(bishops);
         uint64_t attacks = board.getBishopAttacks(sq, occupied);
+        mobilityScore += std::popcount(attacks & ~enemyTerritory);
         mobilityScore += std::popcount(attacks & enemyTerritory) * 3;
     }
 
@@ -53,6 +62,7 @@ int Evaluation::EvaluateMobility(const Board& board, Color color) {
     while (rooks) {
         Square sq = PopBit(rooks);
         uint64_t attacks = board.getRookAttacks(sq, occupied);
+        mobilityScore += std::popcount(attacks & ~enemyTerritory);
         mobilityScore += std::popcount(attacks & enemyTerritory) * 4;
     }
 
@@ -60,6 +70,7 @@ int Evaluation::EvaluateMobility(const Board& board, Color color) {
     while (queens) {
         Square sq = PopBit(queens);
         uint64_t attacks = board.getBishopAttacks(sq, occupied) | board.getRookAttacks(sq, occupied);
+        mobilityScore += std::popcount(attacks & ~enemyTerritory);
         mobilityScore += std::popcount(attacks & enemyTerritory) * 2;
     }
 
