@@ -42,13 +42,6 @@ int Evaluation::EvaluateMobility(const Board& board, Color color) {
     uint64_t occupied = board.getAllOccupancy();
     uint64_t enemyTerritory = (color == WHITE) ? blackTerritoryMask : whiteTerritoryMask;
 
-    uint64_t knights = board.getPieceBitboard(color, KNIGHT);
-    while (knights) {
-        Square sq = PopBit(knights);
-        uint64_t attacks = board.getKnightAttacks(sq);
-        mobilityScore += std::popcount(attacks & enemyTerritory) * 2;
-    }
-
     uint64_t bishops = board.getPieceBitboard(color, BISHOP);
     while (bishops) {
         Square sq = PopBit(bishops);
@@ -345,9 +338,9 @@ int Evaluation::EvaluatePos(const Board& board) {
         mg[c] += pScore;
         eg[c] += pScore;
 
-        int mobility = EvaluateMobility(board, (Color)c);
-        mg[c] += mobility;
-        eg[c] += mobility;
+		int moblity = EvaluateMobility(board, (Color)c);
+        mg[c] += moblity;
+        eg[c] += moblity;
 
         int invasion = EvaluateInvasion(board, (Color)c);
         mg[c] += invasion;
@@ -360,8 +353,6 @@ int Evaluation::EvaluatePos(const Board& board) {
         mg[c] += KingPawnShield(board, (Color)c);
 
         mg[c] += EvaluatePawnCenter(board, (Color)c);
-
-        mg[c] += RookBlockPenalty(board, (Color)c);
 
         uint64_t myRookBits = board.getPieceBitboard((Color)c, ROOK);
         uint64_t seventhRank = (c == WHITE) ? RANK_7 : RANK_2;
