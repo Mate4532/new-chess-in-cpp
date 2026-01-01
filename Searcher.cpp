@@ -137,7 +137,7 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, b
         int score;
         int reduction = LMR::GetReduction(depth, movesSearched - important_move);
 
-        if (depth < 3 && movesSearched <= important_move) {
+        if ((depth < 3 && movesSearched <= important_move) || movesSearched == 1) {
             score = -negamax(depth - 1, -beta, -alpha, ply + 1, m, isCapture);
         }
         else {

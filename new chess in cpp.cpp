@@ -2,8 +2,8 @@
 #include "BoardManager.h"
 
 int main() {
-    bool isWhiteRobot = false;
-    bool isBlackRobot = true;
+    bool isWhiteRobot = true;
+    bool isBlackRobot = false;
     BoardManager bm(isWhiteRobot, isBlackRobot);
     bm.board.PrintBoard();
 
