@@ -118,8 +118,9 @@ void BoardManager::startGameLoop() {
                 n = trimmed[1][0] - '0';
             }
             for (int i = 0; i < n; ++i) {
-                if (board.getPly() > 0)
+                if (board.getPly() > 0) {
                     board.UndoMove(board.getLastMove());
+                }
             }
 
             board.PrintBoard();

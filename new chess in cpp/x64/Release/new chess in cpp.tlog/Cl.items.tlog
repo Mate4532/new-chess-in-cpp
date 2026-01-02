@@ -1,14 +1,14 @@
-C:\Users\szeke\VisualStudioProjects\new-chess-in-cpp\Attacks.cpp;C:\Users\szeke\VisualStudioProjects\new-chess-in-cpp\new chess in cpp\x64\Release\Attacks.obj
-C:\Users\szeke\VisualStudioProjects\new-chess-in-cpp\Board.cpp;C:\Users\szeke\VisualStudioProjects\new-chess-in-cpp\new chess in cpp\x64\Release\Board.obj
-C:\Users\szeke\VisualStudioProjects\new-chess-in-cpp\BoardManager.cpp;C:\Users\szeke\VisualStudioProjects\new-chess-in-cpp\new chess in cpp\x64\Release\BoardManager.obj
-C:\Users\szeke\VisualStudioProjects\new-chess-in-cpp\Evaluation.cpp;C:\Users\szeke\VisualStudioProjects\new-chess-in-cpp\new chess in cpp\x64\Release\Evaluation.obj
-C:\Users\szeke\VisualStudioProjects\new-chess-in-cpp\LMR.cpp;C:\Users\szeke\VisualStudioProjects\new-chess-in-cpp\new chess in cpp\x64\Release\LMR.obj
-C:\Users\szeke\VisualStudioProjects\new-chess-in-cpp\MoveGenerator.cpp;C:\Users\szeke\VisualStudioProjects\new-chess-in-cpp\new chess in cpp\x64\Release\MoveGenerator.obj
-C:\Users\szeke\VisualStudioProjects\new-chess-in-cpp\MoveOrdering.cpp;C:\Users\szeke\VisualStudioProjects\new-chess-in-cpp\new chess in cpp\x64\Release\MoveOrdering.obj
-C:\Users\szeke\VisualStudioProjects\new-chess-in-cpp\new chess in cpp.cpp;C:\Users\szeke\VisualStudioProjects\new-chess-in-cpp\new chess in cpp\x64\Release\new chess in cpp.obj
-C:\Users\szeke\VisualStudioProjects\new-chess-in-cpp\PrecomputedEvaluationData.cpp;C:\Users\szeke\VisualStudioProjects\new-chess-in-cpp\new chess in cpp\x64\Release\PrecomputedEvaluationData.obj
-C:\Users\szeke\VisualStudioProjects\new-chess-in-cpp\RepetitionTable.cpp;C:\Users\szeke\VisualStudioProjects\new-chess-in-cpp\new chess in cpp\x64\Release\RepetitionTable.obj
-C:\Users\szeke\VisualStudioProjects\new-chess-in-cpp\Searcher.cpp;C:\Users\szeke\VisualStudioProjects\new-chess-in-cpp\new chess in cpp\x64\Release\Searcher.obj
-C:\Users\szeke\VisualStudioProjects\new-chess-in-cpp\TranspositionTable.cpp;C:\Users\szeke\VisualStudioProjects\new-chess-in-cpp\new chess in cpp\x64\Release\TranspositionTable.obj
-C:\Users\szeke\VisualStudioProjects\new-chess-in-cpp\UCIParsing.cpp;C:\Users\szeke\VisualStudioProjects\new-chess-in-cpp\new chess in cpp\x64\Release\UCIParsing.obj
-C:\Users\szeke\VisualStudioProjects\new-chess-in-cpp\Zobrist.cpp;C:\Users\szeke\VisualStudioProjects\new-chess-in-cpp\new chess in cpp\x64\Release\Zobrist.obj
+D:\projects\Visual Studio projects\new-chess-in-cpp\Attacks.cpp;D:\projects\Visual Studio projects\new-chess-in-cpp\new chess in cpp\x64\Release\Attacks.obj
+D:\projects\Visual Studio projects\new-chess-in-cpp\Board.cpp;D:\projects\Visual Studio projects\new-chess-in-cpp\new chess in cpp\x64\Release\Board.obj
+D:\projects\Visual Studio projects\new-chess-in-cpp\BoardManager.cpp;D:\projects\Visual Studio projects\new-chess-in-cpp\new chess in cpp\x64\Release\BoardManager.obj
+D:\projects\Visual Studio projects\new-chess-in-cpp\Evaluation.cpp;D:\projects\Visual Studio projects\new-chess-in-cpp\new chess in cpp\x64\Release\Evaluation.obj
+D:\projects\Visual Studio projects\new-chess-in-cpp\LMR.cpp;D:\projects\Visual Studio projects\new-chess-in-cpp\new chess in cpp\x64\Release\LMR.obj
+D:\projects\Visual Studio projects\new-chess-in-cpp\MoveGenerator.cpp;D:\projects\Visual Studio projects\new-chess-in-cpp\new chess in cpp\x64\Release\MoveGenerator.obj
+D:\projects\Visual Studio projects\new-chess-in-cpp\MoveOrdering.cpp;D:\projects\Visual Studio projects\new-chess-in-cpp\new chess in cpp\x64\Release\MoveOrdering.obj
+D:\projects\Visual Studio projects\new-chess-in-cpp\new chess in cpp.cpp;D:\projects\Visual Studio projects\new-chess-in-cpp\new chess in cpp\x64\Release\new chess in cpp.obj
+D:\projects\Visual Studio projects\new-chess-in-cpp\PrecomputedEvaluationData.cpp;D:\projects\Visual Studio projects\new-chess-in-cpp\new chess in cpp\x64\Release\PrecomputedEvaluationData.obj
+D:\projects\Visual Studio projects\new-chess-in-cpp\RepetitionTable.cpp;D:\projects\Visual Studio projects\new-chess-in-cpp\new chess in cpp\x64\Release\RepetitionTable.obj
+D:\projects\Visual Studio projects\new-chess-in-cpp\Searcher.cpp;D:\projects\Visual Studio projects\new-chess-in-cpp\new chess in cpp\x64\Release\Searcher.obj
+D:\projects\Visual Studio projects\new-chess-in-cpp\TranspositionTable.cpp;D:\projects\Visual Studio projects\new-chess-in-cpp\new chess in cpp\x64\Release\TranspositionTable.obj
+D:\projects\Visual Studio projects\new-chess-in-cpp\UCIParsing.cpp;D:\projects\Visual Studio projects\new-chess-in-cpp\new chess in cpp\x64\Release\UCIParsing.obj
+D:\projects\Visual Studio projects\new-chess-in-cpp\Zobrist.cpp;D:\projects\Visual Studio projects\new-chess-in-cpp\new chess in cpp\x64\Release\Zobrist.obj

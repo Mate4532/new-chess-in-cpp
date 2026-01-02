@@ -3,6 +3,10 @@
 #include <chrono>
 #include <iostream>
 
+const int DELTA_MARGIN = 950;
+const int lmp_table[] = { 0, 3, 6, 10, 16, 24 };
+const int futility_margin[] = { 0, 150, 300, 500, 900, 1500 };
+
 inline long long now_ms() {
     return std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::steady_clock::now().time_since_epoch()).count();
@@ -65,6 +69,12 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, b
         if (board.getHalfMoveClock() >= 100 || repetitionTable.Contains(hash)) {
             return 0;
         }
+        alpha = std::max(alpha, -MATE_SCORE + ply);
+        beta = std::min(beta, MATE_SCORE - ply);
+        if (alpha >= beta)
+        {
+            return alpha;
+        }
     }
 
     int ttScore;
@@ -78,11 +88,26 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, b
         board.getKingSquare(board.getSideToMove()),
         (Color)(board.getSideToMove() ^ 1));
 
+
     if (inCheckBeforeMove)
         depth++;
 
     if (depth <= 0)
         return quiescence(alpha, beta);
+
+    bool futilityPrune = false;
+
+    if (depth <= 4 && !inCheckBeforeMove && ply > 0 && abs(alpha) < 90000 && abs(beta) < 90000) {
+
+        int staticEval = Evaluation::EvaluatePos(board);
+        int evalMargin = 120 * depth;
+        if (staticEval - evalMargin >= beta) {
+            return staticEval;
+        }
+        if (staticEval + futility_margin[depth] <= alpha) {
+            futilityPrune = true;
+        }
+    }
 
     if (allowNull && depth >= 3 && !inCheckBeforeMove && ply > 0 && beta < MATE_SCORE) {
         if (board.HasNonPawnMaterial(board.getSideToMove())) {
@@ -123,7 +148,7 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, b
         );
     }
 
-    int important_move_min = depth > 6 ? 1 : 2;
+    int important_move_min = depth > 6 ? 2 : 3;
 	important_move = std::max(important_move, important_move_min);
 
     Move bestMove;
@@ -142,6 +167,20 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, b
         bool quiet =
             !(isCapture) &&
             !(m.getFlags() & PROMOTION_FLAG);
+
+        if (futilityPrune && quiet && movesSearched > 0) {
+
+            bool isKiller = false;
+            if (ply < MAX_KILLER_HISTORY) {
+                if (killerMoves[ply][0].isValid() && m.getMoveData() == killerMoves[ply][0].getMoveData()) isKiller = true;
+                else if (killerMoves[ply][1].isValid() && m.getMoveData() == killerMoves[ply][1].getMoveData()) isKiller = true;
+            }
+
+            if (!isKiller) {
+                board.UndoMove(m, true);
+                continue;
+            }
+        }
 
         uint64_t hash_after_move = board.getHash();
         if (ply > 0) {
@@ -270,7 +309,7 @@ Move Searcher::IterativeDeepening() {
             window *= 2;
         }
         if (tt.Probe(board.getHash(), depth, -MATE_SCORE, MATE_SCORE, rawScore, tmpMove)) {
-            score = ScoreFromTT(rawScore, 0);
+            score = rawScore;
         }
 
         if (tmpMove.isValid()) {
@@ -377,7 +416,7 @@ std::vector<Move> Searcher::GetWhatIfPV(const std::vector<Move>& baseLine, Move 
         }
         else {
             for (int i = (int)fullHistory.size() - 1; i >= 0; i--) board.UndoMove(fullHistory[i], true);
-            return {};
+            return {};  
         }
     }
 
