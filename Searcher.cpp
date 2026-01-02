@@ -62,7 +62,6 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, b
     int originalAlpha = alpha;
     uint64_t hash = board.getHash();
     if (ply > 0) {
-
         if (board.getHalfMoveClock() >= 100 || repetitionTable.Contains(hash)) {
             return 0;
         }
@@ -105,12 +104,8 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, b
         );
     }
 
-    if (ply > 0) {
-		bool was_pawn_move = prev_move.getPieceType() == PAWN;
-		repetitionTable.Push(hash, was_pawn_move || prev_was_capture);
-    }
-
-	important_move = std::max(important_move, 3);
+    int important_move_min = depth > 6 ? 1 : 2;
+	important_move = std::max(important_move, important_move_min);
 
     Move bestMove;
     int movesSearched = 0;
@@ -124,28 +119,40 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, b
         Color us = board.getSideToMove();
         Color enemy = (Color)(us ^ 1);
 
-        bool isUrgent = (m.getFlags() & CAPTURE_FLAG) ||
-            (m.getFlags() & PROMOTION_FLAG) ||
-            inCheckBeforeMove ||
-            board.isSquareAttacked(board.getKingSquare(us), enemy);
-
         bool isCapture = m.getFlags() & CAPTURE_FLAG;
         bool quiet =
             !(isCapture) &&
             !(m.getFlags() & PROMOTION_FLAG);
 
-        int score;
-        int reduction = LMR::GetReduction(depth, movesSearched - important_move);
+        uint64_t hash_after_move = board.getHash();
+        if (ply > 0) {
+            bool was_pawn_move = m.getPieceType() == PAWN;
+            repetitionTable.Push(hash_after_move, was_pawn_move || isCapture);
+        }
 
-        if ((depth < 3 && movesSearched <= important_move) || movesSearched == 1) {
+        int score;
+        bool gives_check = false;
+        int reduction = 0;
+        if (depth >= 3 && quiet) {
+            gives_check = board.isSquareAttacked(board.getKingSquare(enemy), us);
+            if (!gives_check) {
+                reduction = LMR::GetReduction(depth, movesSearched);
+            }
+        }
+        if (movesSearched == 1) {
             score = -negamax(depth - 1, -beta, -alpha, ply + 1, m, isCapture);
         }
         else {
-            score = -negamax(depth - 1 - reduction, -alpha - 1, -alpha, ply + 1, m, isCapture);
+            int r = (movesSearched <= important_move) ? 0 : reduction;
+            score = -negamax(depth - 1 - r, -alpha - 1, -alpha, ply + 1, m, isCapture);
 
-            if (score > alpha) {
+            if (score > alpha && score < beta) {
                 score = -negamax(depth - 1, -beta, -alpha, ply + 1, m, isCapture);
             }
+        }
+
+        if (ply > 0) {
+            repetitionTable.TryPop();
         }
 
         board.UndoMove(m, true);
@@ -160,9 +167,6 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, b
                 }
                 historyMoves[board.getSideToMove()][m.getFrom()][m.getTo()] += depth * depth;
             }
-            if (ply > 0) {
-				repetitionTable.TryPop();
-            }
             tt.Store(hash, ScoreToTT(beta, ply), depth, TT_BETA, m);
             return beta;
         }
@@ -171,10 +175,6 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, b
             alpha = score;
             bestMove = m;
         }
-    }
-
-    if (ply > 0) {
-        repetitionTable.TryPop();
     }
 
     if (movesSearched == 0) {

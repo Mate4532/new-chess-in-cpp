@@ -1,3 +1,1 @@
-﻿  Searcher.cpp
-D:\projects\Visual Studio projects\new-chess-in-cpp\Searcher.cpp(305,16): warning C4101: 'flag': unreferenced local variable
-  new chess in cpp.vcxproj -> D:\projects\Visual Studio projects\new-chess-in-cpp\x64\Debug\new chess in cpp.exe
+﻿C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(463,5): error MSB8020: The build tools for v145 (Platform Toolset = 'v145') cannot be found. To build using the v145 build tools, please install v145 build tools.  Alternatively, you may upgrade to the current Visual Studio tools by selecting the Project menu or right-click the solution, and then selecting "Retarget solution".
