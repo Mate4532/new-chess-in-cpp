@@ -16,7 +16,7 @@ private:
     int quiescence(int alpha, int beta);
 
     const int max_depth = 128;
-    const int robot_thinking_time_ms = 100000;
+    const int robot_thinking_time_ms = 3000;
 
     long long startTime = 0;
     std::atomic<bool> stop;
