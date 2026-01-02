@@ -369,6 +369,14 @@ bool Board::IsCheckMate() {
     return true;
 }
 
+bool Board::HasNonPawnMaterial(Color color) const {
+    if (getPieceBitboard(color, KNIGHT)) return true;
+    if (getPieceBitboard(color, BISHOP)) return true;
+    if (getPieceBitboard(color, ROOK))   return true;
+    if (getPieceBitboard(color, QUEEN))  return true;
+    return false;
+}
+
 bool Board::IsDraw() {
 
     if (boardStateHistory[m_ply].half_move_clock >= 100) return true;

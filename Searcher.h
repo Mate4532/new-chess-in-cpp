@@ -12,7 +12,7 @@ private:
     Board& board;
     TranspositionTable tt;
 
-    int negamax(int depth, int alpha, int beta, int ply, Move prev_move = Move(), bool prev_was_capture = false);
+    int negamax(int depth, int alpha, int beta, int ply, Move prev_move = Move(), bool prev_was_capture = false, bool allowNull = false);
     int quiescence(int alpha, int beta);
 
     const int max_depth = 128;

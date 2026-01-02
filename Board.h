@@ -119,6 +119,7 @@ public:
     inline const Move& getLastMove() {
 		return move_history[move_history.size() - 1];
     }
+    bool HasNonPawnMaterial(Color color) const;
 	bool IsDraw();
     bool IsCheckMate();
     bool isSquareAttacked(Square sq, Color attackerColor) const;

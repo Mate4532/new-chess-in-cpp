@@ -74,7 +74,7 @@ int Evaluation::EvaluateMobility(const Board& board, Color color) {
         mobilityScore += std::popcount(attacks & enemyTerritory) * 1;
     }
 
-    return mobilityScore / 10;
+    return mobilityScore;
 }
 
 int Evaluation::EvaluatePawnTerritory(const Board& board, Color color) {
@@ -336,7 +336,7 @@ int Evaluation::EvaluatePos(const Board& board) {
             eg[c] -= 160;
         }
 
-        if (oppMinors - myMinors >= 2 && myRooks - oppRooks <= 1) {
+        if (oppMinors - myMinors >= 2 && myRooks - oppRooks == 1) {
             mg[c] -= 60;
             eg[c] -= 120;
 		}
@@ -357,6 +357,9 @@ int Evaluation::EvaluatePos(const Board& board) {
         int invasion = EvaluateInvasion(board, (Color)c);
         mg[c] += invasion;
         eg[c] += (invasion / 2);
+
+		mg[c] += RookBlockPenalty(board, (Color)c);
+		eg[c] += RookBlockPenalty(board, (Color)c);
 
         mg[c] += EvaluatePawnTerritory(board, (Color)c);
 

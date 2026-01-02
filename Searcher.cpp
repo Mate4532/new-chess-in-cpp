@@ -51,7 +51,7 @@ int Searcher::quiescence(int alpha, int beta) {
     return alpha;
 }
 
-int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, bool prev_was_capture) {
+int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, bool prev_was_capture, bool allowNull) {
 
     nodes++;
     if ((nodes & 2047) == 0 && now_ms() - startTime >= robot_thinking_time_ms)
@@ -83,6 +83,25 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, b
 
     if (depth <= 0)
         return quiescence(alpha, beta);
+
+    if (allowNull && depth >= 3 && !inCheckBeforeMove && ply > 0 && beta < MATE_SCORE) {
+        if (board.HasNonPawnMaterial(board.getSideToMove())) {
+
+            board.MakeNullMove();
+            int R = 3;
+            if (depth > 6) R = 4;
+
+            int score = -negamax(depth - 1 - R, -beta, -beta + 1, ply + 1, Move(), false, false);
+
+            board.UndoNullMove();
+
+            if (stop) return alpha;
+
+            if (score >= beta) {
+                return beta;
+            }
+        }
+    }
 
     MoveList moves;
     MoveGenerator::GenerateMoves(board, moves);
@@ -140,14 +159,19 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, b
             }
         }
         if (movesSearched == 1) {
-            score = -negamax(depth - 1, -beta, -alpha, ply + 1, m, isCapture);
+            score = -negamax(depth - 1, -beta, -alpha, ply + 1, m, isCapture, true);
         }
         else {
             int r = (movesSearched <= important_move) ? 0 : reduction;
-            score = -negamax(depth - 1 - r, -alpha - 1, -alpha, ply + 1, m, isCapture);
+
+            score = -negamax(depth - 1 - r, -alpha - 1, -alpha, ply + 1, m, isCapture, true);
+
+            if (score > alpha && r > 0) {
+                score = -negamax(depth - 1, -alpha - 1, -alpha, ply + 1, m, isCapture, true);
+            }
 
             if (score > alpha && score < beta) {
-                score = -negamax(depth - 1, -beta, -alpha, ply + 1, m, isCapture);
+                score = -negamax(depth - 1, -beta, -alpha, ply + 1, m, isCapture, true);
             }
         }
 
