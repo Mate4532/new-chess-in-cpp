@@ -46,17 +46,41 @@ void BoardManager::printBestMove() {
 }
 
 void BoardManager::MakeRobotMove() {
-	uint64_t hash_before = board.getHash();
-    std::cout << "Hash kereses elott: " << board.getHash() << std::endl;
-    Move best_move = searcher.GetBestMove();
+    Move robot_move;
+	std::cout << "Robot gondolkodik..." << std::endl;
+    if (board.isDebugMode) {
+        uint64_t hash_before = board.getHash();
+        std::cout << "Hash kereses elott: " << board.getHash() << std::endl;
+        Move robot_move = searcher.GetBestMove();
 
-    uint64_t hash_after = board.getHash();
-    std::cout << "Hash kereses utan: " << board.getHash() << std::endl;
-    if (hash_before != hash_after) {
-		std::cout << "BAJ VAN\n\n\n\n\n" << std::endl;
+        uint64_t hash_after = board.getHash();
+        std::cout << "Hash kereses utan: " << board.getHash() << std::endl;
+        if (hash_before != hash_after) {
+            std::cout << "BAJ VAN\n\n\n\n\n" << std::endl;
+        }
     }
-    board.MakeMove(best_move);
-    std::cout << "Robot lepese: " + best_move.toAlgebraic() << std::endl;
+    else {
+        robot_move = searcher.GetBestMove();
+    }
+    board.MakeMove(robot_move);
+    std::cout << "Robot lepese: " + robot_move.toAlgebraic() << std::endl;
+}
+
+bool BoardManager::didGameEnd() {
+
+    if (board.IsDraw() || board.IsCheckMate())
+        board.PrintBoard();
+
+    if (board.IsDraw()) {
+        std::cout << "\nDontetlen!" << std::endl;
+        return true;
+    }
+
+    if (board.IsCheckMate()) {
+        std::cout << "\nSakkmat, " << (board.getSideToMove() == WHITE ? "Fekete" : "Feher") << " nyert!" << std::endl;
+        return true;
+    }
+    return false;
 }
 
 void BoardManager::startGameLoop() {
@@ -65,31 +89,15 @@ void BoardManager::startGameLoop() {
 
     while (true) {
 
-        if (board.IsDraw()) {
-
-        }
-
-        if (board.IsCheckMate()) {
-            std::cout << "Sakkmat, " << (board.getSideToMove() == WHITE ? "Fekete" : "Feher") << "nyert!" << std::endl;
+        if (didGameEnd())
             break;
-        }
 
         if ((board.getSideToMove() == WHITE && is_white_robot) || (board.getSideToMove() == BLACK && is_black_robot)) {
             MakeRobotMove();
         }
 
-        else {
-
-            if (board.IsDraw()) {
-
-            }
-
-            if (board.IsCheckMate()) {
-                std::cout << "Sakkmat, " << (board.getSideToMove() == WHITE ? "Fekete" : "Feher") << "nyert!" << std::endl;
-                break;
-            }
-
-        }
+        if (didGameEnd())
+            break;
 
         if (is_white_robot && is_black_robot) {
             continue;
@@ -97,6 +105,7 @@ void BoardManager::startGameLoop() {
 
         board.PrintBoard();
 
+		std::cout << (board.getSideToMove() == WHITE ? "Feher" : "Fekete") << " van lepesben!" << std::endl;
         std::cout << "Add meg a lepest (pl. e2e4): ";
         std::getline(std::cin >> std::ws, userInput);
 
@@ -148,7 +157,6 @@ void BoardManager::startGameLoop() {
         else {
             std::cout << "Ervenytelen koordinatak vagy ures mezo!" << std::endl;
         }
-
     }
 }
 

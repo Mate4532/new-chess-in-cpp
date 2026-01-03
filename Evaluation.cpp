@@ -8,7 +8,7 @@ const int bishopValue = 320;
 const int rookValue = 500;
 const int queenValue = 900;
 
-const int passedPawnBonuses[] = { 250, 120, 80, 50, 30, 15 };
+const int passedPawnBonuses[] = { 0, 80, 65, 40, 25, 10 };
 const int isolatedPawnPenalty[] = { 0, -10, -25, -50, -75, -75, -75, -75, -75 };
 const int kingPawnShieldScores[] = { 4, 7, 4, 3, 6, 3 };
 

@@ -1,8 +1,7 @@
-﻿  Searcher.cpp
-D:\projects\Visual Studio projects\new-chess-in-cpp\Searcher.cpp(368,16): warning C4101: 'flag': unreferenced local variable
+﻿  BoardManager.cpp
   Generating code
-  1 of 688 functions ( 0.1%) were compiled, the rest were copied from previous compilation.
+  3 of 696 functions ( 0.4%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    45 functions had inline decision re-evaluated but remain unchanged
+    12 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   new chess in cpp.vcxproj -> D:\projects\Visual Studio projects\new-chess-in-cpp\x64\Release\new chess in cpp.exe

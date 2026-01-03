@@ -38,3 +38,17 @@ bool RepetitionTable::Contains(uint64_t hash) const {
     }
     return false;
 }
+
+bool RepetitionTable::IsDraw(uint64_t hash) const
+{
+    int start = startIndices[count];
+	int counter = 0;
+
+    for (int i = start; i < count; i++) {
+        if (hashes[i] == hash) {
+            counter++;
+        }
+    }
+
+    return counter >= 3;
+}

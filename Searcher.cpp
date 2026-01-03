@@ -26,14 +26,62 @@ inline int Searcher::ScoreFromTT(int score, int ply) {
     return score;
 }
 
+int Searcher::see(Move m) {
+    Square from = m.getFrom();
+    Square to = m.getTo();
+    PieceType attacker = m.getPieceType();
+    PieceType victim = board.getPieceAt(to, (Color)(board.getSideToMove() ^ 1));
+    if (m.getFlags() == EN_PASSANT) victim = PAWN;
+    int gain[32];
+    int d = 0;
+    uint64_t occupied = board.getAllOccupancy();
+    uint64_t attackers = board.getAttacksTo(to, occupied);
+
+    gain[d] = Evaluation::GetPieceValue(victim);
+    Color side = board.getSideToMove();
+
+    occupied ^= (1ULL << from);
+    attackers |= board.getNewXRayAttacks(from, occupied);
+
+    while (true) {
+        side = (Color)(side ^ 1);
+        attackers &= occupied;
+
+        PieceType nextAttacker;
+        Square nextSq = board.getSmallestAttacker(attackers, side, nextAttacker);
+
+        if (nextSq == SQUARE_NONE) break;
+
+        d++;
+        gain[d] = Evaluation::GetPieceValue(nextAttacker) - gain[d - 1];
+
+        if (std::max(-gain[d - 1], gain[d]) < 0) break;
+
+        occupied ^= (1ULL << nextSq);
+        attackers |= board.getNewXRayAttacks(nextSq, occupied);
+    }
+
+    while (--d > 0) {
+        gain[d - 1] = -std::max(-gain[d - 1], gain[d]);
+    }
+
+    return gain[0];
+}
+
 int Searcher::quiescence(int alpha, int beta) {
     nodes++;
+
     if ((nodes & 2047) == 0 && now_ms() - startTime >= robot_thinking_time_ms)
         stop = true;
     if (stop) return alpha;
 
     int standPat = Evaluation::EvaluatePos(board);
-    if (standPat >= beta) return beta;
+
+    if (standPat >= beta) return standPat;
+    if (standPat < alpha - DELTA_MARGIN) {
+        return alpha;
+    }
+
     if (standPat > alpha) alpha = standPat;
 
     MoveList moves;
@@ -44,14 +92,29 @@ int Searcher::quiescence(int alpha, int beta) {
 
     for (const Move& m : moves) {
 
+        if (see(m) < 0) {
+            continue;
+        }
+
+        Color enemy = (Color)(board.getSideToMove() ^ 1);
+        PieceType victim = board.getPieceAt(m.getTo(), enemy);
+
+        bool isPromo = (m.getFlags() & PROMOTION_FLAG);
+        if (!isPromo && standPat + Evaluation::GetPieceValue(victim) + 200 < alpha) {
+            continue;
+        }
+
         if (!board.MakeMove(m, true)) continue;
+
         int score = -quiescence(-beta, -alpha);
         board.UndoMove(m, true);
 
         if (stop) return alpha;
-        if (score >= beta) return beta;
+
+        if (score >= beta) return score;
         if (score > alpha) alpha = score;
     }
+
     return alpha;
 }
 
@@ -66,15 +129,12 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, b
     int originalAlpha = alpha;
     uint64_t hash = board.getHash();
     if (ply > 0) {
-        if (board.getHalfMoveClock() >= 100 || repetitionTable.Contains(hash)) {
+        if (board.getHalfMoveClock() >= 100 || repetitionTable.Contains(hash) || board.IsInsufficientMaterial()) {
             return 0;
         }
         alpha = std::max(alpha, -MATE_SCORE + ply);
         beta = std::min(beta, MATE_SCORE - ply);
-        if (alpha >= beta)
-        {
-            return alpha;
-        }
+        if (alpha >= beta) return alpha;
     }
 
     int ttScore;
@@ -148,7 +208,7 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, b
         );
     }
 
-    int important_move_min = depth > 6 ? 2 : 3;
+    int important_move_min = 3;
 	important_move = std::max(important_move, important_move_min);
 
     Move bestMove;
@@ -168,7 +228,7 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, b
             !(isCapture) &&
             !(m.getFlags() & PROMOTION_FLAG);
 
-        if (futilityPrune && quiet && movesSearched > 0) {
+        if ((futilityPrune && quiet && movesSearched > 0) || (!inCheckBeforeMove && depth <= 5 && movesSearched >= lmp_table[depth] && quiet)) {
 
             bool isKiller = false;
             if (ply < MAX_KILLER_HISTORY) {
@@ -197,6 +257,7 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, b
                 reduction = LMR::GetReduction(depth, movesSearched);
             }
         }
+
         if (movesSearched == 1) {
             score = -negamax(depth - 1, -beta, -alpha, ply + 1, m, isCapture, true);
         }
@@ -230,8 +291,8 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, b
                 }
                 historyMoves[board.getSideToMove()][m.getFrom()][m.getTo()] += depth * depth;
             }
-            tt.Store(hash, ScoreToTT(beta, ply), depth, TT_BETA, m);
-            return beta;
+            tt.Store(hash, ScoreToTT(score, ply), depth, TT_BETA, m);
+            return score;
         }
 
         if (score > alpha) {
@@ -309,7 +370,7 @@ Move Searcher::IterativeDeepening() {
             window *= 2;
         }
         if (tt.Probe(board.getHash(), depth, -MATE_SCORE, MATE_SCORE, rawScore, tmpMove)) {
-            score = rawScore;
+            score = ScoreFromTT(rawScore, 0);
         }
 
         if (tmpMove.isValid()) {
@@ -320,28 +381,30 @@ Move Searcher::IterativeDeepening() {
 
         lastScore = score;
 
-        std::cout << "info depth " << depth << " score ";
-        if (abs(score) > 90000)
-            std::cout << "mate " << ((score > 0) ? (100001 - score) / 2 : -(100001 + score) / 2);
-        else
-            std::cout << "cp " << (board.getSideToMove() == WHITE ? score : -score);
+        if (board.isDebugMode) {
+            std::cout << "info depth " << depth << " score ";
+            if (abs(score) > 90000)
+                std::cout << "mate " << ((score > 0) ? (100001 - score) / 2 : -(100001 + score) / 2);
+            else
+                std::cout << "cp " << (board.getSideToMove() == WHITE ? score : -score);
 
-        std::cout << " time " << (now_ms() - startTime)
-            << " nodes " << nodes
-            << " pv " << bestMove.toAlgebraic()
-            << std::endl;
+            std::cout << " time " << (now_ms() - startTime)
+                << " nodes " << nodes
+                << " pv " << bestMove.toAlgebraic()
+                << std::endl;
 
-        if (abs(score) > 90000)
-            break;
+            if (abs(score) > 90000)
+                break;
+
+            std::cout << "Bestmove: " << bestMove.toAlgebraic()
+                << " score cp "
+                << (board.getSideToMove() == WHITE ? lastScore : -lastScore)
+                << std::endl;
+
+            std::vector<Move> baseLine = GetPVLine(50);
+            PrintPvLine(50);
+        }
     }
-
-    std::cout << "Bestmove: " << bestMove.toAlgebraic()
-        << " score cp "
-        << (board.getSideToMove() == WHITE ? lastScore : -lastScore)
-        << std::endl;
-
-    std::vector<Move> baseLine = GetPVLine(50);
-    PrintPvLine(50);
 
     return bestMove;
 }

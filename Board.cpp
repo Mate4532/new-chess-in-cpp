@@ -235,6 +235,7 @@ void Board::LoadFEN(std::string fen) {
     boardStateHistory[m_ply].zobrist_hash = GenerateFullHash();
     
     repetition_history.Init(*this);
+	repetition_history.Push(boardStateHistory[m_ply].zobrist_hash, true);
 }
 
 PieceType Board::getPieceAt(Square sq, Color color) const {
@@ -370,36 +371,102 @@ bool Board::IsCheckMate() {
 }
 
 bool Board::HasNonPawnMaterial(Color color) const {
-    if (getPieceBitboard(color, KNIGHT)) return true;
+if (getPieceBitboard(color, KNIGHT)) return true;
     if (getPieceBitboard(color, BISHOP)) return true;
     if (getPieceBitboard(color, ROOK))   return true;
     if (getPieceBitboard(color, QUEEN))  return true;
     return false;
 }
 
-bool Board::IsDraw() {
+uint64_t Board::getAttacksTo(Square sq, uint64_t occupied) const {
+    return (getPawnAttacks(sq, BLACK) & getPieceBitboard(WHITE, PAWN)) |
+        (getPawnAttacks(sq, WHITE) & getPieceBitboard(BLACK, PAWN)) |
+        (getKnightAttacks(sq) & (getPieceBitboard(WHITE, KNIGHT) | getPieceBitboard(BLACK, KNIGHT))) |
+        (getBishopAttacks(sq, occupied) & (getPieceBitboard(WHITE, BISHOP) | getPieceBitboard(BLACK, BISHOP) | getPieceBitboard(WHITE, QUEEN) | getPieceBitboard(BLACK, QUEEN))) |
+        (getRookAttacks(sq, occupied) & (getPieceBitboard(WHITE, ROOK) | getPieceBitboard(BLACK, ROOK) | getPieceBitboard(WHITE, QUEEN) | getPieceBitboard(BLACK, QUEEN))) |
+        (getKingAttacks(sq) & (getPieceBitboard(WHITE, KING) | getPieceBitboard(BLACK, KING)));
+}
 
-    if (boardStateHistory[m_ply].half_move_clock >= 100) return true;
-
-    Color us = m_side_to_move;
-    Color enemy = (Color)(us ^ 1);
-    bool inCheck = isSquareAttacked(getKingSquare(us), enemy);
-
-    if (!inCheck) {
-        MoveList moves;
-        MoveGenerator::GenerateMoves(*this, moves);
-
-        for (int i = 0; i < moves.size(); i++) {
-            if (MakeMove(moves[i], true)) {
-                UndoMove(moves[i], true);
-                return false;
-            }
+Square Board::getSmallestAttacker(uint64_t attackers, Color side, PieceType& attackerType) const {
+    for (int pt = PAWN; pt <= KING; pt++) {
+        uint64_t subset = attackers & getPieceBitboard(side, (PieceType)pt);
+        if (subset) {
+            attackerType = (PieceType)pt;
+            return PopBit(subset);
         }
-        return true;
     }
+    attackerType = PIECE_NONE;
+    return SQUARE_NONE;
+}
+
+uint64_t Board::getNewXRayAttacks(Square to, uint64_t occupied) const {
+    uint64_t attackers = 0;
+
+    uint64_t diagonalPieces = getPieceBitboard(WHITE, BISHOP) | getPieceBitboard(BLACK, BISHOP) |
+        getPieceBitboard(WHITE, QUEEN) | getPieceBitboard(BLACK, QUEEN);
+
+    uint64_t straightPieces = getPieceBitboard(WHITE, ROOK) | getPieceBitboard(BLACK, ROOK) |
+        getPieceBitboard(WHITE, QUEEN) | getPieceBitboard(BLACK, QUEEN);
+
+    attackers |= getBishopAttacks(to, occupied) & diagonalPieces;
+
+    attackers |= getRookAttacks(to, occupied) & straightPieces;
+
+    return attackers;
+}
+
+bool Board::IsInsufficientMaterial() const {
+
+    if (getPieceBitboard(WHITE, PAWN) || getPieceBitboard(BLACK, PAWN)) return false;
+    if (getPieceBitboard(WHITE, ROOK) || getPieceBitboard(BLACK, ROOK)) return false;
+    if (getPieceBitboard(WHITE, QUEEN) || getPieceBitboard(BLACK, QUEEN)) return false;
+
+    int whiteMinors = std::popcount(getPieceBitboard(WHITE, KNIGHT) | getPieceBitboard(WHITE, BISHOP));
+    int blackMinors = std::popcount(getPieceBitboard(BLACK, KNIGHT) | getPieceBitboard(BLACK, BISHOP));
+
+    if (whiteMinors == 0 && blackMinors == 0) return true;
+
+    if ((whiteMinors == 1 && blackMinors == 0) || (whiteMinors == 0 && blackMinors == 1)) return true;
 
     return false;
 }
+
+bool Board::IsStalemate() {
+    Color us = m_side_to_move;
+    Color enemy = (Color)(us ^ 1);
+
+    bool inCheck = isSquareAttacked(getKingSquare(us), enemy);
+    if (inCheck) return false;
+
+    MoveList moves;
+    MoveGenerator::GenerateMoves(*this, moves);
+
+    for (int i = 0; i < moves.size(); i++) {
+        if (MakeMove(moves[i], true)) {
+            UndoMove(moves[i], true);
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool Board::IsDraw() {
+
+    if (boardStateHistory[m_ply].half_move_clock >= 100)
+        return true;
+
+    if (repetition_history.IsDraw(boardStateHistory[m_ply].zobrist_hash))
+        return true;
+
+	if (IsStalemate())
+        return true;
+
+    if (IsInsufficientMaterial()) return true;
+
+    return false;
+}
+
 
 bool Board::isSquareAttacked(Square sq, Color attackerColor) const {
     if (pawn_attacks_table[attackerColor ^ 1][sq] & m_bitboards[attackerColor][PAWN]) return true;
@@ -717,19 +784,23 @@ void Board::PrintBoard() const {
     std::cout << "    +-----------------+" << std::endl;
     std::cout << "      A B C D E F G H\n" << std::endl;
 
-    std::cout << "Jatekban levo szin: " << ((m_side_to_move == WHITE) ? "Feher" : "Fekete") << std::endl;
-    std::cout << "Feher parasztok szama: " << (int)piece_count[WHITE][PAWN] << std::endl;
-    std::cout << "Feher batyak szama: " << (int)piece_count[WHITE][ROOK] << std::endl;
-    std::cout << "Feher lovak szama: " << (int)piece_count[WHITE][KNIGHT] << std::endl;
-    std::cout << "Feher futok szama: " << (int)piece_count[WHITE][BISHOP] << std::endl;
-    std::cout << "Feher kiralynok szama: " << (int)piece_count[WHITE][QUEEN] << std::endl;
-    std::cout << "Feher kiraly szama: " << (int)piece_count[WHITE][KING] << std::endl;
-    std::cout << "Fekete parasztok szama: " << (int)piece_count[BLACK][PAWN] << std::endl;
-    std::cout << "Fekete batyak szama: " << (int)piece_count[BLACK][ROOK] << std::endl;
-    std::cout << "Fekete lovak szama: " << (int)piece_count[BLACK][KNIGHT] << std::endl;
-    std::cout << "Fekete futok szama: " << (int)piece_count[BLACK][BISHOP] << std::endl;
-    std::cout << "Fekete kiralynok szama: " << (int)piece_count[BLACK][QUEEN] << std::endl;
-    std::cout << "Fekete kiraly szama: " << (int)piece_count[BLACK][KING] << std::endl;
+    if (isDebugMode) {
+
+        std::cout << "Jatekban levo szin: " << ((m_side_to_move == WHITE) ? "Feher" : "Fekete") << std::endl;
+        std::cout << "Feher parasztok szama: " << (int)piece_count[WHITE][PAWN] << std::endl;
+        std::cout << "Feher batyak szama: " << (int)piece_count[WHITE][ROOK] << std::endl;
+        std::cout << "Feher lovak szama: " << (int)piece_count[WHITE][KNIGHT] << std::endl;
+        std::cout << "Feher futok szama: " << (int)piece_count[WHITE][BISHOP] << std::endl;
+        std::cout << "Feher kiralynok szama: " << (int)piece_count[WHITE][QUEEN] << std::endl;
+        std::cout << "Feher kiraly szama: " << (int)piece_count[WHITE][KING] << std::endl;
+        std::cout << "Fekete parasztok szama: " << (int)piece_count[BLACK][PAWN] << std::endl;
+        std::cout << "Fekete batyak szama: " << (int)piece_count[BLACK][ROOK] << std::endl;
+        std::cout << "Fekete lovak szama: " << (int)piece_count[BLACK][KNIGHT] << std::endl;
+        std::cout << "Fekete futok szama: " << (int)piece_count[BLACK][BISHOP] << std::endl;
+        std::cout << "Fekete kiralynok szama: " << (int)piece_count[BLACK][QUEEN] << std::endl;
+        std::cout << "Fekete kiraly szama: " << (int)piece_count[BLACK][KING] << std::endl;
+
+    }
 }
 
 void perft_thread_worker(Board board_copy, std::vector<Move> moves_to_test, int depth) {

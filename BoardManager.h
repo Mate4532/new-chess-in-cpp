@@ -24,5 +24,6 @@ public:
 	Move getBestMoveOnBoard() { return searcher.GetBestMove(); }
 	void printBestMove();
 	void MakeRobotMove();
+	bool didGameEnd();
 	void startGameLoop();
 };

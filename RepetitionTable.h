@@ -23,6 +23,7 @@ public:
     void Push(uint64_t hash, bool reset);
     void TryPop();
     bool Contains(uint64_t hash) const;
+    bool IsDraw(uint64_t hash) const;
     inline std::vector<uint64_t> getHashes() const {
         return std::vector<uint64_t>(hashes, hashes + count);
     }

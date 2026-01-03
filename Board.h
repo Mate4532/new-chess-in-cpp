@@ -56,6 +56,8 @@ private:
     };
 
 public:
+	bool isDebugMode = false;
+
     Board();
     void InitializeBoard();
     void InitializeAttackTables();
@@ -120,6 +122,11 @@ public:
 		return move_history[move_history.size() - 1];
     }
     bool HasNonPawnMaterial(Color color) const;
+    uint64_t getAttacksTo(Square sq, uint64_t occupied) const;
+    Square getSmallestAttacker(uint64_t attackers, Color side, PieceType& attackerType) const;
+    uint64_t getNewXRayAttacks(Square to, uint64_t occupied) const;
+    bool IsInsufficientMaterial() const;
+    bool IsStalemate();
 	bool IsDraw();
     bool IsCheckMate();
     bool isSquareAttacked(Square sq, Color attackerColor) const;

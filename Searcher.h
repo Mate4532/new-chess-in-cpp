@@ -39,6 +39,8 @@ public:
 		LMR::Init();
     }
 
+    int see(Move m);
+
     Move IterativeDeepening();
     Move GetBestMove();
     void PrintPvLine(int depth);
