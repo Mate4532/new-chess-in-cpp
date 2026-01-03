@@ -12,7 +12,7 @@ void TranspositionTable::Store(uint64_t hash, int score, int depth, TTFlag flag,
     size_t index = (hash ^ (hash >> 32)) % table.size();
     TTEntry& e = table[index];
 
-    if (e.key == 0 || e.gen != generation || depth >= e.depth) {
+    if (e.key == 0 || e.key != hash || e.gen != generation || depth >= e.depth) {
         e.key = hash;
         e.score = (int32_t)score;
         e.depth = (int8_t)depth;
@@ -41,11 +41,11 @@ bool TranspositionTable::Probe(uint64_t hash, int depth, int alpha, int beta, in
         }
 
         if (e.type == TT_ALPHA && e.score <= alpha) {
-            score = alpha;
+            score = e.score;
             return true;
         }
         if (e.type == TT_BETA && e.score >= beta) {
-            score = beta;
+            score = e.score;
             return true;
         }
     }

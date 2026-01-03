@@ -395,16 +395,18 @@ Move Searcher::IterativeDeepening() {
 
             if (abs(score) > 90000)
                 break;
-
-            std::cout << "Bestmove: " << bestMove.toAlgebraic()
-                << " score cp "
-                << (board.getSideToMove() == WHITE ? lastScore : -lastScore)
-                << std::endl;
-
-            std::vector<Move> baseLine = GetPVLine(50);
-            PrintPvLine(50);
         }
     }
+
+    if (board.isDebugMode) {
+        std::cout << "Bestmove: " << bestMove.toAlgebraic()
+            << " score cp "
+            << (board.getSideToMove() == WHITE ? lastScore : -lastScore)
+            << std::endl;
+
+        std::vector<Move> baseLine = GetPVLine(50);
+        PrintPvLine(50);
+	}
 
     return bestMove;
 }

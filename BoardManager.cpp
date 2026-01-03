@@ -51,7 +51,7 @@ void BoardManager::MakeRobotMove() {
     if (board.isDebugMode) {
         uint64_t hash_before = board.getHash();
         std::cout << "Hash kereses elott: " << board.getHash() << std::endl;
-        Move robot_move = searcher.GetBestMove();
+        robot_move = searcher.GetBestMove();
 
         uint64_t hash_after = board.getHash();
         std::cout << "Hash kereses utan: " << board.getHash() << std::endl;
