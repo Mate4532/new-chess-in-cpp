@@ -1,0 +1,22 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "new chess in cpp\\x64\\Release\\tbconfig.obj",
+            "outputs": [
+                "new chess in cpp\\x64\\Release\\tbconfig.h_2536F1CFFA1E00BC.ifc.dt.module.json",
+                "new chess in cpp\\x64\\Release\\tbconfig.h_2536F1CFFA1E00BC.ifc.dt.d.json",
+                "new chess in cpp\\x64\\Release\\tbconfig.h.ifc"
+            ],
+            "provides": [
+                {
+                    "logical-name": "D:\\projects\\Visual Studio projects\\new-chess-in-cpp\\tbconfig.h",
+                    "source-path": "d:\\projects\\visual studio projects\\new-chess-in-cpp\\tbconfig.h",
+                    "lookup-method": "absolute"
+                }
+            ],
+            "requires": []
+        }
+    ]
+}

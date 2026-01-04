@@ -1,46 +1,19 @@
-c:\users\szeke\visualstudioprojects\new-chess-in-cpp\new chess in cpp\x64\release\vc143.pdb
-c:\users\szeke\visualstudioprojects\new-chess-in-cpp\new chess in cpp\x64\release\zobrist.obj
-c:\users\szeke\visualstudioprojects\new-chess-in-cpp\new chess in cpp\x64\release\uciparsing.obj
-c:\users\szeke\visualstudioprojects\new-chess-in-cpp\new chess in cpp\x64\release\transpositiontable.obj
-c:\users\szeke\visualstudioprojects\new-chess-in-cpp\new chess in cpp\x64\release\searcher.obj
-c:\users\szeke\visualstudioprojects\new-chess-in-cpp\new chess in cpp\x64\release\repetitiontable.obj
-c:\users\szeke\visualstudioprojects\new-chess-in-cpp\new chess in cpp\x64\release\precomputedevaluationdata.obj
-c:\users\szeke\visualstudioprojects\new-chess-in-cpp\new chess in cpp\x64\release\new chess in cpp.obj
-c:\users\szeke\visualstudioprojects\new-chess-in-cpp\new chess in cpp\x64\release\moveordering.obj
-c:\users\szeke\visualstudioprojects\new-chess-in-cpp\new chess in cpp\x64\release\movegenerator.obj
-c:\users\szeke\visualstudioprojects\new-chess-in-cpp\new chess in cpp\x64\release\lmr.obj
-c:\users\szeke\visualstudioprojects\new-chess-in-cpp\new chess in cpp\x64\release\evaluation.obj
-c:\users\szeke\visualstudioprojects\new-chess-in-cpp\new chess in cpp\x64\release\boardmanager.obj
-c:\users\szeke\visualstudioprojects\new-chess-in-cpp\new chess in cpp\x64\release\board.obj
-c:\users\szeke\visualstudioprojects\new-chess-in-cpp\new chess in cpp\x64\release\attacks.obj
-c:\users\szeke\visualstudioprojects\new-chess-in-cpp\x64\release\new chess in cpp.exe
-c:\users\szeke\visualstudioprojects\new-chess-in-cpp\x64\release\new chess in cpp.pdb
-c:\users\szeke\visualstudioprojects\new-chess-in-cpp\new chess in cpp\x64\release\new chess in cpp.ipdb
-c:\users\szeke\visualstudioprojects\new-chess-in-cpp\new chess in cpp\x64\release\new chess in cpp.iobj
-d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\attacks.obj
-d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\board.obj
-d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\boardmanager.obj
-d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\evaluation.obj
-d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\lmr.obj
-d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\movegenerator.obj
-d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\moveordering.obj
-d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\new chess in cpp.obj
-d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\precomputedevaluationdata.obj
-d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\repetitiontable.obj
-d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\searcher.obj
-d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\transpositiontable.obj
-d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\uciparsing.obj
+d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\vc145.pdb
 d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\zobrist.obj
-d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\new chess in cpp.ipdb
-d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\new chess in cpp.iobj
-d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\vc143.pdb
-d:\projects\visual studio projects\new-chess-in-cpp\x64\release\new chess in cpp.pdb
-d:\projects\visual studio projects\new-chess-in-cpp\x64\release\new chess in cpp.exe
+d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\uciparsing.obj
+d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\transpositiontable.obj
+d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\tablebase.obj
+d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\searcher.obj
+d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\repetitiontable.obj
+d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\precomputedevaluationdata.obj
+d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\new chess in cpp.obj
+d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\moveordering.obj
+d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\movegenerator.obj
+d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\lmr.obj
+d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\evaluation.obj
+d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\boardmanager.obj
+d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\board.obj
+d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\attacks.obj
 d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\new chess in cpp.tlog\cl.command.1.tlog
-d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\new chess in cpp.tlog\cl.items.tlog
 d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\new chess in cpp.tlog\cl.read.1.tlog
 d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\new chess in cpp.tlog\cl.write.1.tlog
-d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\new chess in cpp.tlog\link.command.1.tlog
-d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\new chess in cpp.tlog\link.read.1.tlog
-d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\new chess in cpp.tlog\link.secondary.1.tlog
-d:\projects\visual studio projects\new-chess-in-cpp\new chess in cpp\x64\release\new chess in cpp.tlog\link.write.1.tlog

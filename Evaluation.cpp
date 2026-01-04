@@ -2,12 +2,6 @@
 #include "PrecomputedEvaluationData.h"
 #include "Searcher.h"
 
-const int pawnValue = 100;
-const int knightValue = 300;
-const int bishopValue = 320;
-const int rookValue = 500;
-const int queenValue = 900;
-
 const int passedPawnBonuses[] = { 0, 80, 65, 40, 25, 10 };
 const int isolatedPawnPenalty[] = { 0, -10, -25, -50, -75, -75, -75, -75, -75 };
 const int kingPawnShieldScores[] = { 4, 7, 4, 3, 6, 3 };
@@ -114,8 +108,9 @@ int Evaluation::EvaluatePawnTerritory(const Board& board, Color color) {
             (enemyTerritoryMask & RANK_MASKS[rank])) {
             bonus += 5;
         }
+        int relativeRank = (color == WHITE) ? rank : 7 - rank;
 
-        bool inEnemyTerritory = (color == WHITE) ? (rank >= 4) : (rank <= 3);
+        bool inEnemyTerritory = relativeRank >= 4;
         if (inEnemyTerritory) {
             bonus += 6;
             if (file >= 2 && file <= 5) 

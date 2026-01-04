@@ -69,7 +69,7 @@ void BoardManager::MakeRobotMove() {
 bool BoardManager::didGameEnd() {
 
     if (board.IsDraw() || board.IsCheckMate())
-        board.PrintBoard();
+        board.PrintBoard(is_white_player, is_black_player);
 
     if (board.IsDraw()) {
         std::cout << "\nDontetlen!" << std::endl;
@@ -103,7 +103,7 @@ void BoardManager::startGameLoop() {
             continue;
         }
 
-        board.PrintBoard();
+        board.PrintBoard(is_white_player, is_black_player);
 
 		std::cout << (board.getSideToMove() == WHITE ? "Feher" : "Fekete") << " van lepesben!" << std::endl;
         std::cout << "Add meg a lepest (pl. e2e4): ";
@@ -132,7 +132,7 @@ void BoardManager::startGameLoop() {
                 }
             }
 
-            board.PrintBoard();
+            board.PrintBoard(is_white_player, is_black_player);
             continue;
         }
 

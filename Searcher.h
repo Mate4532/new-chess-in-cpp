@@ -26,13 +26,14 @@ private:
     Move killerMoves[MAX_KILLER_HISTORY][2];
 	RepetitionTable repetitionTable;
 
-	const int MATE_SCORE = 100000;
-
     void ClearHistory();
     void AgeHistory();
     void ClearKillers();
 
 public:
+
+    static const int MATE_SCORE = 100000;
+
     Searcher(Board& board) : board(board), tt(128) { 
         ClearHistory(); 
         PrecomputedEvaluationData::Init();

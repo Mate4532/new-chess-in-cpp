@@ -744,7 +744,7 @@ uint64_t Board::Perft(int depth) {
     return nodes;
 }
 
-void Board::PrintBoard() const {
+void Board::PrintBoard(bool is_white_player, bool is_black_player) const {
     std::cout << "\n    +-----------------+" << std::endl;
 
     for (int rank = 7; rank >= 0; rank--)
@@ -753,7 +753,7 @@ void Board::PrintBoard() const {
 
         for (int file = 0; file < 8; file++)
         {
-            int sq = GetSquare(rank, file);
+            int sq = is_black_player && !is_white_player ? GetSquare(7 - rank, 7 - file) : GetSquare(rank, file);
 
             char piece_to_print = '.';
             bool found = false;
@@ -798,7 +798,7 @@ void Board::PrintBoard() const {
         std::cout << "Fekete lovak szama: " << (int)piece_count[BLACK][KNIGHT] << std::endl;
         std::cout << "Fekete futok szama: " << (int)piece_count[BLACK][BISHOP] << std::endl;
         std::cout << "Fekete kiralynok szama: " << (int)piece_count[BLACK][QUEEN] << std::endl;
-        std::cout << "Fekete kiraly szama: " << (int)piece_count[BLACK][KING] << std::endl;
+        std::cout << "Fekete kiraly szama: " << (int)piece_count[BLACK][KING] << std::endl << std::endl;
 
     }
 }

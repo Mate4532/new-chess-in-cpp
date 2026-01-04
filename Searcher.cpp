@@ -92,14 +92,15 @@ int Searcher::quiescence(int alpha, int beta) {
 
     for (const Move& m : moves) {
 
-        if (see(m) < 0) {
+        bool isPromo = (m.getFlags() & PROMOTION_FLAG);
+
+		if (!isPromo && see(m) < 0) {
             continue;
         }
 
         Color enemy = (Color)(board.getSideToMove() ^ 1);
         PieceType victim = board.getPieceAt(m.getTo(), enemy);
 
-        bool isPromo = (m.getFlags() & PROMOTION_FLAG);
         if (!isPromo && standPat + Evaluation::GetPieceValue(victim) + 200 < alpha) {
             continue;
         }
@@ -243,10 +244,8 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, b
         }
 
         uint64_t hash_after_move = board.getHash();
-        if (ply > 0) {
-            bool was_pawn_move = m.getPieceType() == PAWN;
-            repetitionTable.Push(hash_after_move, was_pawn_move || isCapture);
-        }
+        bool irreversible = (m.getPieceType() == PAWN) || (isCapture);
+        repetitionTable.Push(hash_after_move, irreversible);
 
         int score;
         bool gives_check = false;
@@ -275,10 +274,7 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move prev_move, b
             }
         }
 
-        if (ply > 0) {
-            repetitionTable.TryPop();
-        }
-
+        repetitionTable.TryPop();
         board.UndoMove(m, true);
         if (stop)
             return alpha;

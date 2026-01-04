@@ -56,7 +56,7 @@ private:
     };
 
 public:
-	bool isDebugMode = false;
+	bool isDebugMode = true;
 
     Board();
     void InitializeBoard();
@@ -137,5 +137,5 @@ public:
     uint64_t PerftDivide(int depth);
     uint64_t Perft(int depth);
     uint64_t MultiThreadedPerft(int depth);
-    void PrintBoard() const;
+    void PrintBoard(bool is_white_player = true, bool is_black_player = true) const;
 };

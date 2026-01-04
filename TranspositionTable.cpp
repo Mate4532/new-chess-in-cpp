@@ -1,10 +1,21 @@
 
 #include "TranspositionTable.h"
 
+size_t NextPowerOf2(size_t n) {
+    size_t count = 0;
+    if (n && !(n & (n - 1))) return n;
+    while (n != 0) { n >>= 1; count += 1; }
+    return 1ULL << count;
+}
+
 TranspositionTable::TranspositionTable(size_t mb) {
 
     size_t entryCount = (mb * 1024 * 1024) / sizeof(TTEntry);
     table.resize(entryCount);
+    
+    size_t size = NextPowerOf2(entryCount);
+
+    table.resize(size);
     Clear();
 }
 
@@ -12,7 +23,12 @@ void TranspositionTable::Store(uint64_t hash, int score, int depth, TTFlag flag,
     size_t index = (hash ^ (hash >> 32)) % table.size();
     TTEntry& e = table[index];
 
-    if (e.key == 0 || e.key != hash || e.gen != generation || depth >= e.depth) {
+    if (e.key != hash || e.gen != generation || depth >= e.depth) {
+
+        if (e.key != hash) {
+            e.move = Move();
+        }
+
         e.key = hash;
         e.score = (int32_t)score;
         e.depth = (int8_t)depth;

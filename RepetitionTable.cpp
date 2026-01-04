@@ -15,10 +15,12 @@ void RepetitionTable::Init(const Board& board) {
 
 void RepetitionTable::Push(uint64_t hash, bool reset)
 {
-    if (count < MAX_REPETITION) {
-        hashes[count] = hash;
-        startIndices[count + 1] = reset ? count : startIndices[count];
+    if (count >= MAX_REPETITION) {
+        return;
     }
+
+    hashes[count] = hash;
+    startIndices[count + 1] = reset ? count : startIndices[count];
     ++count;
 }
 
