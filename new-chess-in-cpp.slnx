@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="new-chess-in-cpp.vcxproj" Id="7fe761da-f75e-480c-88fd-df623d30e446" />
+</Solution>

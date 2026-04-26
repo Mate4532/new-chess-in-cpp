@@ -1,0 +1,39 @@
+[Event "Bot vs Bot Match"]
+[Site "Local Simulation"]
+[Date "2026.04.25"]
+[White "Improved_searcher_v5"]
+[Black "Old_searcher_v4"]
+[Result "1/2-1/2"]
+[SetUp "1"]
+[FEN "rnbqkb1r/pp3ppp/4pn2/2pp4/2PP4/2N1PN2/PP3PPP/R1BQKB1R b KQkq -"]
+
+1... a6 1. cxd5 exd5 2. dxc5 Bxc5 3. a3 Ba7 4. b4 Nc6 5. Be2 O-O 6. O-O 
+d4 7. exd4 Nxd4 8. Nxd4 Qxd4 9. Bb2 Ne4 10. Na4 Qd8 11. Bd3 Qh4 12. Bxe4 
+Qxe4 13. Re1 Qg6 14. Nc5 Bxc5 15. bxc5 Be6 16. Re3 Rad8 17. Qe2 Bg4 18. Qe1 
+Rd3 19. Rxd3 Qxd3 20. f3 Bc8 21. Rd1 Qc2 22. Bc3 Be6 23. Rd6 h6 24. h3 
+Re8 25. Qe3 Kh7 26. h4 Bh3 27. Qd3+ Qxd3 28. Rxd3 Be6 29. Rd6 Rc8 30. Bb4 
+a5 31. Bxa5 Rxc5 32. Bd2 Rc2 33. a4 Rc4 34. a5 Rxh4 35. Rb6 Rd4 36. Be3 
+Rd3 37. Kf2 Bc8 38. Rb5 Ra3 39. g4 Ra2+ 40. Kg3 Ra4 41. Bc5 f6 42. Bf8 
+Kg8 43. Bd6 Ra1 44. Rc5 Be6 45. Rb5 Rd1 46. Bb4 Bd5 47. Kf2 Rd3 48. Ke2 
+Bc4 49. Rc5 Ba6 50. Kf2 Rd7 51. Rc2 Kh7 52. Kg3 Kg6 53. Rd2 Rxd2 54. Bxd2 
+h5 55. gxh5+ Kxh5 56. Kf4 Bb5 57. Bb4 Kg6 58. Bc5 Kf7 59. Bb4 g5+ 60. Kg3 
+f5 61. Bc5 Kg6 62. f4 g4 63. Bf2 Kf7 64. Bd4 Bc6 65. Ba7 Ke6 66. Bb6 
+Be4 67. Bd4 Kd5 68. Be5 Kc4 69. Bd6 Kd4 70. Be7 Bh1 71. Bf6+ Kd3 72. Be5 
+Bf3 73. Bd6 Bc6 74. Bc5 Ke2 75. Bb6 Bf3 76. Bd4 Kf1 77. Bc5 Bc6 78. Bf8 
+Bh1 79. Bc5 Bd5 80. Be3 Ba2 81. Ba7 Ke2 82. Bd4 Bd5 83. Ba7 Kd3 84. Bb6 
+Kc4 85. Bc7 Kb4 86. Kh4 Be4 87. Bb6 Bc2 88. Bd8 Bb1 89. Bb6 Be4 90. Bc7 
+Bd3 91. Kg3 Bc2 92. Bd8 Be4 93. Bb6 Kc4 94. Ba7 Kb5 95. Bb6 Bd3 96. Bd8 
+Bb1 97. Bc7 Kc4 98. Bb6 Bd3 99. Kf2 Be4 100. Bd8 Bc6 101. Kg3 Kb5 102. Bb6 
+Be4 103. Bd8 Ka4 104. Bb6 Bc6 105. Bd8 Kb3 106. Bf6 Bf3 107. Bg5 Kc3 108. Bf6+ 
+Kb4 109. Bd8 Bc6 110. Bb6 Bh1 111. Bc7 b6 112. axb6 Be4 113. Bd6+ Kb5 114. Bc7 
+Kc5 115. Kh4 Bh1 116. Bd8 Bf3 117. Bc7 Be4 118. Bd8 Bc6 119. Bc7 Bb7 120. Bd8 
+Bd5 121. Bc7 Bc6 122. Bd8 Kb5 123. Bc7 Ba8 124. Bd8 Bb7 125. Kh5 g3 126. Bh4 
+g2 127. Bf2 Kc4 128. Kg5 Be4 129. Kh4 Kd3 130. Kg3 Ke2 131. Bd4 Ba8 132. Kh2 
+Kf1 133. Be3 Bb7 134. Bc5 Be4 135. Bd4 Bf3 136. Be3 Bc6 137. Bd4 Be4 138. Bc5 
+Bd5 139. Bg1 Ke2 140. Kg3 Bb7 141. Bd4 Bc6 142. Bc5 Ba8 143. Bd4 Bb7 144. Bg1 
+Bd5 145. Bc5 Bc6 146. Bd4 Ke1 147. Bc5 Be4 148. Kh3 Bf3 149. Kh2 Bb7 150. Kg3 
+Kd2 151. Bb4+ Ke2 152. Bc5 Kd1 153. Kf2 Kc2 154. Kg1 Kd2 155. Kh2 Kd3 156. Kg3 
+Bc6 157. Bg1 Bd5 158. Kh2 Be4 159. Bc5 Ke2 160. Kg3 Kd2 161. Bg1 Bb7 162. Bf2 
+Bd5 163. Bg1 Kc3 164. Kh2 Kd3 165. Bc5 Bc6 166. Kg1 Ke2 167. Bd4 Kf3 168. Be5 
+Ke3 169. Bc7 Ke2 170. Bb8 Bd5 171. Bc7 Kd3 172. Kf2 Kc4 173. Be5 Kc5 174. Bc7 
+Bf3 175. Bd8 Kb5 176. Bf6 Be2  1/2-1/2

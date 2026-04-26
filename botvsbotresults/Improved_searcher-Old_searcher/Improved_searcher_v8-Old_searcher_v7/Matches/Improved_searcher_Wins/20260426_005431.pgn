@@ -1,0 +1,33 @@
+[Event "Bot vs Bot Match"]
+[Site "Local Simulation"]
+[Date "2026.04.26"]
+[White "Old_searcher_v7"]
+[Black "Improved_searcher_v8"]
+[Result "0-1"]
+[SetUp "1"]
+[FEN "rnbqkb1r/pp2pppp/2p2n2/3p2B1/3P4/2N2N2/PPP1PPPP/R2QKB1R b KQkq -"]
+
+1... Ne4 1. Bf4 Qa5 2. Bd2 Qb6 3. Bc1 Nd7 4. e3 Qa5 5. Bd2 Nxd2 6. Qxd2 
+g6 7. h4 h5 8. Bd3 Bg7 9. Ne2 Qxd2+ 10. Kxd2 e5 11. dxe5 Nxe5 12. Nxe5 
+Bxe5 13. c3 Bd6 14. a4 a5 15. g3 O-O 16. Nd4 Kg7 17. Kc2 Re8 18. Be2 
+Bf8 19. Rhd1 Bd7 20. Kd2 Rad8 21. Ke1 Rb8 22. Rd2 Ra8 23. Bf3 Ra6 24. Nb3 
+Rea8 25. Nd4 Bh3 26. Ke2 Rb6 27. Kd3 Re8 28. Kc2 Kh8 29. Rad1 Bd7 30. b3 
+Kg8 31. Be2 Kg7 32. Bf3 Bc8 33. Kb2 Be7 34. Kc2 Ba3 35. Re1 Bc5 36. Kb2 
+Be7 37. Kc2 Bd7 38. Rh1 Bf6 39. Rhd1 Kh8 40. Be2 Bg7 41. Bf3 Bh3 42. Kb2 
+Kg8 43. Ne2 Bd7 44. Nd4 Kf8 45. Kc2 Be5 46. Kb2 Bf6 47. Kc2 Ra6 48. Be2 
+Raa8 49. Kb1 Rac8 50. Bf3 Kg7 51. Kc2 Rc7 52. Kb1 Bc8 53. Kc2 Rce7 54. Rf1 
+Bd7 55. Rfd1 Kf8 56. Rc1 Kg8 57. Rf1 Kh8 58. Rc1 Bc8 59. Rcd1 Kg8 60. Rc1 
+Kf8 61. Rcd1 Bg7 62. Rc1 Kg8 63. Rcd1 Bd7 64. Rc1 Kf8 65. Rcd1 b6 66. Kb1 
+Bf6 67. Ne2 Kg7 68. Nd4 Rc8 69. Kc2 Rc7 70. Kc1 Re8 71. Kc2 Bh3 72. Kd3 
+Bc8 73. Kc2 Rh8 74. Kb2 Rd8 75. Ne2 Re8 76. Nd4 Kh8 77. Be2 Bg7 78. Bf3 
+Kg8 79. Kb1 Bd7 80. Rc1 Kh8 81. Rcd1 Bf8 82. c4 dxc4 83. bxc4 Kg7 84. Rd3 
+Re5 85. Bg2 Kg8 86. Nf3 Re7 87. Nd4 Rc8 88. Bf3 c5 89. Nb5 Bf5 90. Bd5 
+Rd8 91. Kc1 Bxd3 92. Rxd3 Kh8 93. f4 Bh6 94. Kd2 f5 95. Rb3 Bf8 96. Ke2 
+Red7 97. Ra3 Bg7 98. Rd3 Bf6 99. Na3 Kg7 100. Rb3 Rb8 101. Bc6 Rc7 102. Bg2 
+Re7 103. Rd3 Rbe8 104. Bc6 Rc8 105. Rd6 Bb2 106. Nc2 Rf8 107. Bd5 Rb8 108. Kd3 
+Rc7 109. Ke2 Bf6 110. Na3 Re7 111. Kd2 Bc3+ 112. Kxc3 Rxe3+ 113. Kb2 Rxg3 114. Nb5 
+Re8 115. Nc3 Ree3 116. Rd7+ Kf8 117. Rf7+ Ke8 118. Nb1 Re2+ 119. Ka1 Rf2 120. Rb7 
+Rxf4 121. Kb2 Rxh4 122. Kc1 Rh2 123. Nd2 Rc3+ 124. Kd1 Rd3 125. Bc6+ Kf8 126. Rxb6 
+Rdxd2+ 127. Ke1 Rc2 128. Kd1 Ra2 129. Kc1 Raf2 130. Rb8+ Ke7 131. Re8+ Kf6 132. Re1 
+Kg5 133. Be4 fxe4 134. Kb1 e3 135. Rd1 Rhg2 136. Kc1 Kg4 137. Kb1 h4 138. Rh1 
+h3 139. Rd1 h2 140. Re1 Rg1 141. Rc1 Kg5 142. Rd1 Rxd1+  0-1

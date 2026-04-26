@@ -1,0 +1,33 @@
+[Event "Bot vs Bot Match"]
+[Site "Local Simulation"]
+[Date "2026.04.25"]
+[White "Old_searcher_v3"]
+[Black "Improved_searcher_v4"]
+[Result "1/2-1/2"]
+[SetUp "1"]
+[FEN "rnbqk1nr/ppp1bppp/3p4/4p3/2BPP3/5N2/PPP2PPP/RNBQK2R b KQkq -"]
+
+1... exd4 1. Nxd4 Nf6 2. Nc3 O-O 3. O-O Nxe4 4. Nxe4 d5 5. Bd3 dxe4 6. Bxe4 
+Nd7 7. Bf4 Nc5 8. Bf3 c6 9. Be3 Ne6 10. c3 Nxd4 11. Bxd4 Be6 12. Qc2 
+Qc7 13. Rae1 Bd6 14. g3 h6 15. a3 Bc4 16. Be2 Be6 17. Qe4 Bd5 18. Qg4 
+f5 19. Qg6 Rad8 20. Bd3 Qd7 21. c4 Qf7 22. Qxg7+ Qxg7 23. Bxg7 Kxg7 24. cxd5 
+cxd5 25. Re2 f4 26. Rd2 h5 27. Be2 h4 28. Rxd5 fxg3 29. fxg3 Be7 30. Rb5 
+hxg3 31. hxg3 b6 32. Rxf8 Rxf8 33. Kg2 Bc5 34. Bc4 Rf2+ 35. Kh3 Rc2 36. Bd3 
+Rd2 37. Bb1 a6 38. Rb3 Bd4 39. Rb4 a5 40. Rc4 Rxb2 41. Bd3 Bg1 42. a4 
+Rd2 43. Rc7+ Kf6 44. Bb5 Kg5 45. Rg7+ Kf6 46. Rd7 Rxd7 47. Bxd7 Ke5 48. Bb5 
+Ke4 49. Bc6+ Kd4 50. g4 Be3 51. Kh4 Bf2+ 52. Kh5 Ke5 53. Kh6 Kd6 54. Bb5 
+Be3+ 55. Kh5 Ke5 56. g5 Bc5 57. g6 Bf8 58. Kg5 Bg7 59. Be2 Kd6 60. Bf1 
+Ke5 61. Bc4 Kd6 62. Bd3 Ke6 63. Ba6 Ke5 64. Bb5 Ke6 65. Kf4 Be5+ 66. Ke4 
+Bh8 67. Be2 Kd6 68. Bf1 Bg7 69. Kf5 Ba1 70. Kg5 Bg7 71. Be2 Ke5 72. Bd1 
+Ke6 73. Bc2 Kd5 74. Kf5 Kd6 75. Bd3 Bb2 76. Be2 Ba1 77. Bc4 Bh8 78. Ke4 
+Bf6 79. Ba6 Bb2 80. Kd3 Kd5 81. Ke3 Bc1+ 82. Kf3 Bh6 83. Be2 Ke5 84. Bb5 
+Bg7 85. Kg4 Bf8 86. Bd3 Bg7 87. Bb1 Bh6 88. Bc2 Kf6 89. Kf3 Bg5 90. Ke4 
+Kxg6 91. Kd5+ Kf6 92. Kc6 Be3 93. Kd6 Bc5+ 94. Kd5 Ke7 95. Kc6 Bd4 96. Bb3 
+Kf6 97. Bc4 Bc5 98. Be2 Ke5 99. Bf3 Kd4 100. Kb5 Kc3 101. Be4 Be3 102. Bf5 
+Bf2 103. Be6 Bg1 104. Bh3 Bd4 105. Bf5 Be3 106. Bh3 Kb3 107. Be6+ Kb2 108. Kc4 
+Bc5 109. Bd7 Bf2 110. Bb5 Bg3 111. Bd7 Bh2 112. Be8 Bf4 113. Bc6 Be3 114. Bb5 
+Kc2 115. Bc6 Kd2 116. Bb5 Ke1 117. Bc6 Ke2 118. Kc3 Bg5 119. Kc2 Ke3 120. Bd7 
+Kd4 121. Bb5 Be3 122. Be2 Kc5 123. Bb5 Kb4 124. Kd3 Bf2 125. Ke4 Kc5 126. Ke5 
+Bd4+ 127. Ke6 Be3 128. Kd7 Kb4 129. Kd6 Bc5+ 130. Kd5 Kc3 131. Bd7 Kb3 132. Bc6 
+Bg1 133. Bd7 Kb4 134. Kd6 Bc5+ 135. Ke5 Kc4 136. Bb5+ Kc3 137. Be8 Bd4+ 138. Ke4 
+Bg1 139. Bb5 Kb4 140. Ke5 Kb3  1/2-1/2

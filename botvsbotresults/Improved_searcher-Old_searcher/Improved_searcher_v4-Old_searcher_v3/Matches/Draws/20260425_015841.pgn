@@ -1,0 +1,35 @@
+[Event "Bot vs Bot Match"]
+[Site "Local Simulation"]
+[Date "2026.04.25"]
+[White "Old_searcher_v3"]
+[Black "Improved_searcher_v4"]
+[Result "1/2-1/2"]
+[SetUp "1"]
+[FEN "rnbqkb1r/ppp1pppp/5n2/8/4N3/8/PPPP1PPP/R1BQKBNR w KQkq -"]
+
+1. Nxf6+ exf6 2. d4 Bd6 3. Bd3 O-O 4. c3 c5 5. Ne2 Nc6 6. dxc5 Bxc5 
+7. O-O Ne5 8. Bc2 Qc7 9. Bf4 Rd8 10. Nd4 Qb6 11. Qb1 g6 12. Nb3 Bd6 
+13. Qc1 Bd7 14. h3 Ba4 15. Rd1 Bxb3 16. axb3 Bc5 17. Bg3 Rxd1+ 18. Bxd1 Bd6 
+19. Qe3 Qxe3 20. fxe3 a6 21. b4 Rd8 22. Be2 Bc7 23. Rd1 Nf3+ 24. Kf2 Bxg3+ 
+25. Kxg3 Nd2 26. Kf4 Kf8 27. Bf3 b6 28. Ra1 g5+ 29. Kg4 Nc4 30. Rxa6 Kg7 
+31. Be2 Ne5+ 32. Kh5 Rd2 33. Bf3 Rxb2 34. Rxb6 Rc2 35. Bd5 Rxc3 36. b5 Rxe3 
+37. Rb7 Rd3 38. Be6 Rd4 39. g3 Rd3 40. b6 Kf8 41. Rxf7+ Nxf7 42. b7 Rd8 
+43. Bc8 Nd6 44. b8=Q Nxc8 45. Qb2 Nd6 46. Qxf6+ Nf7 47. Qc6 h6 48. Qc5+ Rd6 
+49. Qc3 Kg8 50. Qc1 Kg7 51. Qa1+ Rf6 52. Qd4 Nd6 53. Qa7+ Rf7 54. Qa1+ Rf6 
+55. Qa3 Nf5 56. g4 Nd6 57. Qa7+ Nf7 58. Qe3 Nh8 59. Qe7+ Nf7 60. Qb4 Ne5 
+61. Qb7+ Nf7 62. Qd7 Rb6 63. Qd4+ Rf6 64. Qd5 Nd6 65. Qh1 Ne8 66. Qe4 Kf8 
+67. Qb4+ Kg8 68. Qc4+ Kf8 69. Qc8 Re6 70. h4 gxh4 71. Kxh4 Kf7 72. Qb7+ Re7 
+73. Qb3+ Kg7 74. Qb4 Kf7 75. Kh5 Re6 76. Qc4 Nf6+ 77. Kh4 Ke7 78. Qc5+ Kf7 
+79. Kh3 Re4 80. Qc1 Rxg4 81. Qc7+ Kg6 82. Qc2+ Kg7 83. Qd1 Rg5 84. Qb1 Rh5+ 
+85. Kg3 Rg5+ 86. Kh4 Rh5+ 87. Kg3 Rg5+ 88. Kf3 Kf7 89. Qc2 Rh5 90. Qc4+ Kg6 
+91. Qd3+ Rf5+ 92. Kg2 Kg5 93. Kh3 Rf4 94. Qd2 h5 95. Qa5+ Rf5 96. Qc3 Ne4 
+97. Qg7+ Kf4 98. Qb2 Rc5 99. Kh4 Rc3 100. Qb7 Kf3 101. Kxh5 Re3 102. Kg6 Kg3 
+103. Qc7+ Kg2 104. Kf5 Nf2 105. Qc6+ Rf3+ 106. Ke6 Kg3 107. Qd6+ Kg2 108. Qd5 Kg3 
+109. Qe5+ Kg2 110. Qc5 Rg3 111. Qd5+ Kf1 112. Qc4+ Kg2 113. Qc6+ Kg1 114. Kf7 Rd3 
+115. Qc1+ Kg2 116. Qg5+ Kf3 117. Qh5+ Kg2 118. Qc5 Kf1 119. Qb5 Kg2 120. Qb7+ Kf1 
+121. Qa6 Kg2 122. Qg6+ Kf1 123. Qb6 Ra3 124. Qb1+ Kg2 125. Qg6+ Kf1 126. Qc6 Rd3 
+127. Kg6 Ke2 128. Qa6 Kd1 129. Qa1+ Ke2 130. Qb2+ Ke1 131. Qc1+ Ke2 132. Qc4 Kd1 
+133. Qe6 Rf3 134. Qe5 Kd2 135. Qb2+ Kd1 136. Qb1+ Ke2 137. Qa2+ Ke1 138. Qa1+ Ke2 
+139. Qa6+ Ke1 140. Qa5+ Kf1 141. Qb5+ Ke1 142. Qb4+ Ke2 143. Qc4+ Kd2 144. Qd5+ Ke2 
+145. Qd6 Ke1 146. Qc6 Nd3 147. Kg5 Rf2 148. Qe4+ Kd2 149. Qa4 Nc1 150. Qa3 Re2 
+151. Qa1  1/2-1/2

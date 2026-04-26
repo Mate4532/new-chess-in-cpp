@@ -1,0 +1,33 @@
+[Event "Bot vs Bot Match"]
+[Site "Local Simulation"]
+[Date "2026.04.25"]
+[White "Improved_searcher_v6"]
+[Black "Old_searcher_v5"]
+[Result "1-0"]
+[SetUp "1"]
+[FEN "rnbqkbnr/pp2pppp/8/3pP3/3p4/5N2/PPP2PPP/RNBQKB1R w KQkq -"]
+
+1. Nxd4 e6 2. Bd3 Ne7 3. O-O Nbc6 4. Nxc6 Nxc6 5. Re1 Qc7 6. Bf4 Bd7 
+7. c3 Be7 8. b4 g5 9. Bg3 h5 10. h3 O-O-O 11. Nd2 Kb8 12. a3 Bc8 
+13. Nb3 Rdg8 14. Bf1 Qd8 15. b5 Na5 16. Nxa5 Qxa5 17. Rc1 Bc5 18. a4 h4 
+19. Bh2 b6 20. Qg4 Bb7 21. Red1 Rh7 22. Rc2 Rhg7 23. Kh1 Rd8 24. Bg1 Rgg8 
+25. Be2 Ba8 26. Bf3 Rh8 27. Ra1 Rdg8 28. c4 Rd8 29. cxd5 Bxd5 30. Bxd5 Rxd5 
+31. Qxg5 Qb4 32. Qf6 Rhd8 33. Qxf7 Qb3 34. Rcc1 R5d7 35. Qg6 Rd3 36. Qg4 R3d7 
+37. a5 Bd4 38. Rab1 Qd5 39. a6 Bxe5 40. Re1 Rg7 41. Qe4 Rd6 42. Qxd5 Rxd5 
+43. Rxe5 Rxe5 44. Bh2 Rd7 45. Bxe5+ Ka8 46. Bf6 Rd5 47. Re1 Rxb5 48. Rxe6 Kb8 
+49. Kh2 Kc8 50. Bxh4 Ra5 51. Re8+ Kd7 52. Re7+ Kc6 53. Rxa7 Rh5 54. Bg3 Kb5 
+55. Ra8 Rg5 56. a7 Ka6 57. Bd6 Rd5 58. Bf4 Rd4 59. Bg5 Rd7 60. h4 Rc7 
+61. Rf8 Kxa7 62. Bf4 Rg7 63. Re8 Kb7 64. Bg3 Rg4 65. Re7+ Ka6 66. Re1 Kb7 
+67. Rd1 b5 68. f3 Rc4 69. Kh3 b4 70. Rb1 Kc6 71. Be1 b3 72. Rxb3 Rc2 
+73. Rb4 Re2 74. Bg3 Ra2 75. Re4 Kd5 76. Rg4 Rb2 77. Kh2 Kc6 78. Rg8 Rd2 
+79. Bf4 Rf2 80. Rg6+ Kb5 81. Rg5+ Kc4 82. Rc5+ Kd4 83. Rc6 Re2 84. Kh3 Rb2 
+85. Ra6 Kc4 86. Ra4+ Kb3 87. Ra8 Rf2 88. Be3 Re2 89. Bg5 Re5 90. g3 Kc2 
+91. Bf4 Rb5 92. Ra2+ Kc3 93. Ra3+ Kc4 94. Ra4+ Kd3 95. Ra1 Rb2 96. Ra3+ Kc4 
+97. Ra5 Kd3 98. Ra6 Rb1 99. Ra3+ Ke2 100. Be3 Rd1 101. Bh6 Rf1 102. Kg4 Rb1 
+103. Ra2+ Kd3 104. Ra5 Rb4+ 105. Kh3 Rb1 106. Bg5 Ke2 107. Ra3 Rd1 108. Ra2+ Kxf3 
+109. Ra3+ Ke4 110. Kg4 Rb1 111. Ra4+ Kd3 112. Ra6 Rb4+ 113. Kh3 Rb1 114. Rd6+ Kc4 
+115. Bd8 Re1 116. Rd7 Kb5 117. Kg4 Re4+ 118. Kf5 Re3 119. Kf4 Re2 120. Rc7 Rd2 
+121. Rc8 Ka6 122. Ke3 Rd1 123. Bg5 Kb7 124. Rc3 Rd5 125. Ke4 Ra5 126. Be7 Ra2 
+127. Bc5 Rg2 128. Kf5 Rd2 129. Kf6 Ra2 130. Bd6 Rf2+ 131. Kg5 Rf7 132. Be5 Rg7+ 
+133. Bxg7 Ka7 134. h5 Kb8 135. Rb3+ Ka8 136. h6 Ka7 137. h7 Ka6 138. h8=Q Ka7 
+139. g4 Ka6 140. Qa8+  1-0

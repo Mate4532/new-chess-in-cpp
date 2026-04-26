@@ -1,0 +1,33 @@
+[Event "Bot vs Bot Match"]
+[Site "Local Simulation"]
+[Date "2026.04.26"]
+[White "Old_searcher_v8"]
+[Black "Improved_searcher_v9"]
+[Result "1/2-1/2"]
+[SetUp "1"]
+[FEN "rn2kbnr/pp1qpppp/3p4/2p5/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq -"]
+
+1. c4 Nc6 2. d4 cxd4 3. Nxd4 Nf6 4. Nc3 g6 5. f3 Bg7 6. Be3 O-O 
+7. O-O Nxd4 8. Bxd4 a6 9. Qe2 Qc6 10. b3 Nd7 11. Bxg7 Kxg7 12. Qb2 f6 
+13. Kh1 Rf7 14. Rac1 Qc5 15. Nd5 e6 16. b4 Qc6 17. Nf4 Nf8 18. Rfd1 a5 
+19. Qa3 Qb6 20. b5 Qc5 21. Qxc5 dxc5 22. Rd6 g5 23. Nxe6+ Nxe6 24. Rxe6 Rd8 
+25. h3 Rd2 26. a3 Ra2 27. e5 Rxa3 28. Re8 fxe5 29. Rxe5 h6 30. Rxc5 Ra2 
+31. Rc8 a4 32. Ra8 Rd7 33. c5 Rdd2 34. Rg1 Kg6 35. Ra7 Rac2 36. Rxb7 Rxc5 
+37. Rb6+ Kf5 38. Ra6 Rxb5 39. Rxa4 Rbb2 40. h4 Ra2 41. Rc4 Rdc2 42. Rd4 Rf2 
+43. h5 Rae2 44. Rd6 Re6 45. Rxe6 Kxe6 46. Ra1 Kf7 47. Kh2 Rd2 48. Kh3 Rf2 
+49. Ra6 Kg7 50. Rg6+ Kh7 51. Rd6 Kg7 52. Rd7+ Kg8 53. Rb7 Kh8 54. Rb8+ Kh7 
+55. Rb3 Rd2 56. Rb7+ Kg8 57. g3 Rd4 58. Ra7 Kh8 59. Re7 Ra4 60. Re4 Ra7 
+61. Re6 Kg7 62. Rg6+ Kh7 63. Rb6 Ra4 64. Rb7+ Kh8 65. Rc7 Rb4 66. Rc6 Kh7 
+67. Rd6 Ra4 68. Rd7+ Kh8 69. Rf7 Kg8 70. Rf6 Kg7 71. Rg6+ Kh7 72. Re6 Kg7 
+73. Re4 Ra7 74. Rd4 Rc7 75. Rb4 Ra7 76. Kg4 Kf7 77. Rd4 Rc7 78. Rd6 Kg7 
+79. Rg6+ Kh7 80. Re6 Ra7 81. Kf5 Kg7 82. Rg6+ Kh7 83. Rd6 Rf7+ 84. Kg4 Kg7 
+85. Rg6+ Kh7 86. Ra6 Rc7 87. Ra4 Kg7 88. Ra5 Kh7 89. Rb5 Ra7 90. Rb6 Rc7 
+91. Kf5 Rf7+ 92. Rf6 Rb7 93. Rc6 Rf7+ 94. Kg4 Ra7 95. Re6 Ra5 96. Rd6 Ra7 
+97. Rd4 Kg7 98. Rd6 Rf7 99. Ra6 Rc7 100. Ra1 Rc4+ 101. Kh3 Rc3 102. Ra7+ Kg8 
+103. Kg4 Rc4+ 104. Kf5 Rc5+ 105. Ke4 Rc4+ 106. Kd3 Rb4 107. g4 Rb3+ 108. Ke4 Rb4+ 
+109. Kf5 Rb5+ 110. Ke6 Rb6+ 111. Ke7 Rb3 112. Kf6 Rb6+ 113. Ke5 Rb5+ 114. Kd4 Rb3 
+115. Ra8+ Kg7 116. Ke4 Rb4+ 117. Ke3 Rb3+ 118. Kf2 Rb7 119. Ra5 Kh7 120. Ke3 Rb3+ 
+121. Ke4 Rb4+ 122. Kd5 Rb3 123. Ra7+ Kg8 124. Ra6 Kh7 125. Ke4 Rb4+ 126. Ke5 Rb3 
+127. Ra7+ Kg8 128. Ra8+ Kg7 129. Ke6 Rxf3 130. Ra7+ Kg8 131. Ke5 Rf4 132. Ra6 Kh7 
+133. Rc6 Rxg4 134. Rc7+ Kg8 135. Rc8+ Kg7 136. Rc7+ Kf8 137. Rc8+ Kg7 138. Rc7+ Kf8 
+139. Rc8+ Kg7  1/2-1/2

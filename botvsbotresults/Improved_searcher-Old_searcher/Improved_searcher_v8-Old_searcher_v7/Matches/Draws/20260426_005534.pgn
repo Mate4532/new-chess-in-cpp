@@ -1,0 +1,14 @@
+[Event "Bot vs Bot Match"]
+[Site "Local Simulation"]
+[Date "2026.04.26"]
+[White "Old_searcher_v7"]
+[Black "Improved_searcher_v8"]
+[Result "1/2-1/2"]
+[SetUp "1"]
+[FEN "rnbqkb1r/ppp1pppp/3p1n2/8/3PP3/3B4/PPP2PPP/RNBQK1NR b KQkq -"]
+
+1... e5 1. d5 a5 2. Ne2 Nbd7 3. O-O Nc5 4. f3 Nxd3 5. Qxd3 Be7 6. Be3 
+Nd7 7. b3 Bg5 8. a4 Bxe3+ 9. Qxe3 O-O 10. Ng3 Nc5 11. f4 f6 12. Nd2 
+Bd7 13. h3 b6 14. Rf2 exf4 15. Rxf4 Qe7 16. Rf3 f5 17. exf5 Qxe3+ 18. Rxe3 
+Bxf5 19. Nxf5 Rxf5 20. c4 Raf8 21. Rae1 Rf2 22. Ne4 Rb2 23. Nxc5 bxc5 24. Kh2 
+Rff2 25. Re8+ Kf7 26. R8e7+ Kf8 27. Re8+ Kf7 28. R8e7+ Kf8 29. Re8+ Kf7  1/2-1/2

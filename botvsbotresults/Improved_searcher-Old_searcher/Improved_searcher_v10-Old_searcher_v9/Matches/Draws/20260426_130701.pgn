@@ -1,0 +1,34 @@
+[Event "Bot vs Bot Match"]
+[Site "Local Simulation"]
+[Date "2026.04.26"]
+[White "Old_searcher_v9"]
+[Black "Improved_searcher_v10"]
+[Result "1/2-1/2"]
+[SetUp "1"]
+[FEN "rnbqkb1r/ppp1pp1p/5np1/3P4/3P4/5N2/PP2PPPP/RNBQKB1R b KQkq -"]
+
+1... Bg7 1. Qa4+ c6 2. dxc6 Nxc6 3. e3 O-O 4. Nc3 Bd7 5. Qa3 Re8 6. d5 
+Nb8 7. Bc4 Bf5 8. O-O Nbd7 9. Nd4 Nb6 10. Bb3 Nbxd5 11. Nxd5 Nxd5 12. Nxf5 
+gxf5 13. Rd1 e6 14. Bxd5 exd5 15. Bd2 Qe7 16. Bb4 Qe4 17. Bc3 Bxc3 18. bxc3 
+b6 19. Rd4 Qe6 20. Rad1 Rac8 21. h3 Rc5 22. Qxa7 Kh8 23. Qa3 Rec8 24. Qb2 
+Rxc3 25. Rxd5 h6 26. Rd6 Qe7 27. Rxh6+ Kg8 28. Rxb6 Rc2 29. Qd4 Qg5 30. Qf6 
+Qxf6 31. Rxf6 R8c5 32. Rd7 Re2 33. g3 Rxa2 34. Rfxf7 Rac2 35. Kg2 Rb2 36. Rf6 
+Ra2 37. Rb6 Rc8 38. g4 fxg4 39. Rg6+ Kh8 40. Rh6+ Kg8 41. Rd4 gxh3+ 42. Rxh3 
+Rcc2 43. Rg3+ Kf7 44. Rf4+ Ke6 45. Rg6+ Kd5 46. Rg8 Ke6 47. Rh8 Kd7 48. Rhf8 
+Re2 49. R4f7+ Kc6 50. Rf6+ Kd5 51. Rf5+ Ke6 52. Rf3 Kd7 53. R8f7+ Kd8 54. R7f4 
+Kd7 55. Rg3 Ke7 56. Rh3 Kd6 57. Rf6+ Ke7 58. Rf5 Ke8 59. Kg3 Ra3 60. Re5+ 
+Kf8 61. Kg2 Kg7 62. Re4 Rea2 63. Rg4+ Kf6 64. Rf4+ Ke6 65. Kg3 Re2 66. Rf3 
+Re1 67. Rh6+ Ke7 68. Rh7+ Ke8 69. Rh5 Rg1+ 70. Kf4 Rg6 71. Rf5 Ra2 72. e4 
+Rg2 73. Ke5 Ra5+ 74. Kd4 Ra4+ 75. Ke3 Ra3+ 76. Ke2 Ra2+ 77. Kf1 Rg4 78. Re5+ 
+Kd7 79. Rf7+ Kd6 80. Re8 Ra1+ 81. Ke2 Ra3 82. Rf5 Kd7 83. Ree5 Kd6 84. Rd5+ 
+Ke6 85. Rfe5+ Kf6 86. Re8 Kf7 87. Rde5 Rh4 88. R5e7+ Kf6 89. Re6+ Kf7 90. R8e7+ 
+Kf8 91. e5 Rh2 92. Re8+ Kf7 93. R6e7+ Kg6 94. Rd7 Ra2+ 95. Ke3 Rhxf2 96. Rg8+ 
+Kh6 97. Ke4 Ra5 98. Rd6+ Kh7 99. Re8 Re2+ 100. Kf4 Rf2+ 101. Ke3 Rf1 102. Re7+ 
+Kg8 103. Rd8+ Rf8 104. Rdd7 Rf1 105. e6 Ra3+ 106. Kd4 Kf8 107. Rh7 Ke8 108. Rb7 
+Ra4+ 109. Kd3 Ra8 110. e7 Rd1+ 111. Kc2 Ra2+ 112. Kxd1 Rd2+ 113. Kc1 Rc2+ 114. Kb1 
+Rc1+ 115. Kb2 Rb1+ 116. Kc3 Rc1+ 117. Kb4 Rb1+ 118. Kc5 Rc1+ 119. Kb6 Rc6+ 120. Ka5 
+Ra6+ 121. Kb5 Ra5+ 122. Kb6 Rb5+ 123. Ka7 Ra5+ 124. Kb8 Ra8+ 125. Kc7 Rc8+ 126. Kd6 
+Rc6+ 127. Ke5 Rc5+ 128. Kd4 Rc4+ 129. Kd3 Rc3+ 130. Ke2 Rc2+ 131. Ke3 Rc3+ 132. Kf2 
+Rc2+ 133. Kg3 Rc3+ 134. Kg2 Rc2+ 135. Kf1 Rc1+ 136. Ke2 Rc2+ 137. Kf3 Rc3+ 138. Kg4 
+Rc4+ 139. Kh3 Rc3+ 140. Kh2 Rc2+ 141. Kh1 Rc1+ 142. Kg2 Rc2+ 143. Kf1 Rc1+ 144. Ke2 
+Rc2+  1/2-1/2

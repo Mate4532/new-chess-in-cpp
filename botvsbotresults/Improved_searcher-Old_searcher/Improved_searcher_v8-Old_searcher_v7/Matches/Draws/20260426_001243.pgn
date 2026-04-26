@@ -1,0 +1,33 @@
+[Event "Bot vs Bot Match"]
+[Site "Local Simulation"]
+[Date "2026.04.26"]
+[White "Improved_searcher_v8"]
+[Black "Old_searcher_v7"]
+[Result "1/2-1/2"]
+[SetUp "1"]
+[FEN "r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1PP2/5N2/PPPP2PP/RNBQK2R b KQkq -"]
+
+1... d6 1. fxe5 dxe5 2. d3 Nf6 3. Qe2 Bg4 4. Bb5 O-O 5. Bxc6 bxc6 6. Nbd2 
+Nh5 7. Nb3 Bb6 8. Be3 Nf4 9. Bxf4 exf4 10. O-O-O a5 11. a4 Be3+ 12. Kb1 
+c5 13. g3 Qd6 14. Rde1 Rab8 15. gxf4 Bxf4 16. Rhg1 Be6 17. e5 Qb6 18. Ng5 
+Bxg5 19. Rxg5 Bxb3 20. cxb3 Qxb3 21. e6 Qxe6 22. Qxe6 fxe6 23. Rxc5 Rf2 24. Rc2 
+Rxc2 25. Kxc2 Kf7 26. Re5 Ra8 27. Rc5 Ra7 28. h4 g6 29. Kc3 Ke7 30. d4 
+h6 31. b4 axb4+ 32. Kxb4 Kd6 33. a5 Rb7+ 34. Kc4 c6 35. a6 Ra7 36. Ra5 
+g5 37. hxg5 hxg5 38. Rxg5 Rxa6 39. Rg1 Ra4+ 40. Kc3 Ra8 41. Kd3 Ra3+ 42. Kc4 
+Rh3 43. Ra1 Rh2 44. Kd3 Rh4 45. Rg1 Rh3+ 46. Kc4 Rh2 47. Ra1 Rc2+ 48. Kd3 
+Rf2 49. Ke3 Rb2 50. Kd3 Rb5 51. Kc4 Rf5 52. Kd3 Rh5 53. Kc4 Rh4 54. Kd3 
+Rh8 55. Kc4 Rh7 56. Kd3 Rf7 57. Kc4 Rf4 58. Kd3 Rf3+ 59. Kc4 Rf7 60. Kd3 
+Rf8 61. Kc4 Rh8 62. Rg1 Rf8 63. Ra1 Rf6 64. Kd3 Rh6 65. Kc4 Rh5 66. Rg1 
+Ra5 67. Kd3 Ra8 68. Kc4 Ra2 69. Kd3 Ra5 70. Rh1 Ra3+ 71. Kc4 Ra4+ 72. Kd3 
+Rb4 73. Rh8 Rb3+ 74. Kc4 Rb1 75. Rd8+ Kc7 76. Rh8 Rg1 77. Kd3 Kd6 78. Rd8+ 
+Ke7 79. Rh8 Kd7 80. Kc2 Rf1 81. Kd2 Kd6 82. Rd8+ Kc7 83. Re8 Rf2+ 84. Kd3 
+Rf6 85. Rh8 Rf1 86. Kd2 c5 87. dxc5 Rf5 88. Re8 Kd7 89. Rb8 Rxc5 90. Ke3 
+Kd6 91. Kd4 Rc1 92. Rb7 Rd1+ 93. Ke4 Re1+ 94. Kd4 Rf1 95. Ra7 Rf4+ 96. Ke3 
+Rc4 97. Kd3 Rc7 98. Ra1 Kd5 99. Rb1 Rc5 100. Ra1 Rb5 101. Ra3 Ke5 102. Ke3 
+Rc5 103. Ra4 Rc3+ 104. Ke2 Kf5 105. Ra5+ e5 106. Ra4 Rg3 107. Kf2 Rg4 108. Ra3 
+Rh4 109. Kg3 Rf4 110. Kg2 e4 111. Kg3 Kg5 112. Ra5+ Rf5 113. Ra3 Rf1 114. Kg2 
+Rf4 115. Kg3 Rf5 116. Re3 Re5 117. Ra3 Kf5 118. Kf2 Kf4 119. Ra8 Rc5 120. Rf8+ 
+Rf5 121. Rg8 Ke5+ 122. Ke3 Rf3+ 123. Ke2 Rb3 124. Re8+ Kf4 125. Rf8+ Kg3 126. Rg8+ 
+Kh3 127. Rh8+ Kg4 128. Rg8+ Kf5 129. Rf8+ Ke6 130. Re8+ Kd5 131. Rd8+ Kc5 132. Re8 
+Kc6 133. Rxe4 Rb5 134. Ke3 Rb3+ 135. Kf4 Kc5 136. Re6 Rb4+ 137. Kf5 Rb3 138. Re5+ 
+Kd6 139. Re6+ Kc5 140. Re5+ Kd6 141. Re6+ Kc5  1/2-1/2
