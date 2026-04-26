@@ -1,3 +1,0 @@
-Draws: 51
-Improved_searcher win: 28
-Old_searcher win: 27
