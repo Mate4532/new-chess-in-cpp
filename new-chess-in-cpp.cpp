@@ -3,7 +3,7 @@
 
 int main() {
 
-	AllSettings allSettings;
+	/*AllSettings allSettings;
 
 	RobotSettings robotSettings;
 	robotSettings.isWhiteRobot = true;
@@ -21,12 +21,12 @@ int main() {
 	timeSettings.rtum = RobotTimeUsageMode::TOURNEMENT_TIME;
 
 	allSettings.robotSettings = robotSettings;
-	allSettings.timeSettings = timeSettings;
+	allSettings.timeSettings = timeSettings; */
 
     BoardManager bm;
+	bm.runUCIService();
 	// bm.setSettings(allSettings);
 	// bm.startMultiThreadedSimulation(1000, 10);
-	bm.runUCIService();
 
 	return 0;
 }
