@@ -5,3 +5,4 @@ new-chess-in-cpp.vcxproj.user
 Release/
 Debug/
 botvsbotresults/
+generatedBotVersions/

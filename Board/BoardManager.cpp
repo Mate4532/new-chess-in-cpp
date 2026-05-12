@@ -29,14 +29,6 @@ BoardManager::BoardManager() : board(), resultManager() {
     });
 }
 
-std::unique_ptr<ISearcher> BoardManager::createBot(SearcherType st) {
-    switch (st) {
-    case SearcherType::OLD_SEARCHER: return std::make_unique<OSearcher>();
-    case SearcherType::IMRPOVED_SEARCHER: return std::make_unique<ImpSearcher>();
-    default: return std::make_unique<ImpSearcher>();
-    }
-}
-
 void BoardManager::goPerft(int perftDepth) {
 
     std::cout << "Perft(" << perftDepth << ") inditasa..." << std::endl;
@@ -101,6 +93,9 @@ bool BoardManager::isMovePromotion(int fromX, int fromY, int toX, int toY) {
 
     PieceType p = board.getPieceAt(fromSq, board.getSideToMove());
     if (p != PAWN) return false;
+
+    Move m = getMove(fromX, fromY, toX, toY, QUEEN);
+    if (isRobotToMove() || !m.isValid()) return false;
 
     int targetRank = toY;
     return (targetRank == 0 || targetRank == 7);
@@ -261,9 +256,6 @@ void BoardManager::writeGameResult(GameResult gameResult, std::vector<std::strin
 
     bool whiteWon = (gameResult & GameResult::WHITE_WON) != 0;
 
-    Color winnerColor = whiteWon ? WHITE : BLACK;
-    ISearcher* winnerBot = (winnerColor == WHITE) ? whiteRobot.get() : blackRobot.get();
-
     std::string whiteNameToSaveInFile = whiteRobot->getNameToSaveInFile();
     std::string blackNameToSaveInFile = blackRobot->getNameToSaveInFile();
 
@@ -420,6 +412,12 @@ void BoardManager::runUCIService() {
                 updateRobotTournementTime();
             }
 
+            if ((board.getSideToMove() == WHITE && whiteRobot == nullptr) ||
+                (board.getSideToMove() == BLACK && blackRobot == nullptr)) {
+                setupBotsForNormalGame(currentSettings.robotSettings);
+                setRobotTimeUsageMode(currentSettings.timeSettings.rtum);
+            }
+
             Move best = (board.getSideToMove() == WHITE)
                 ? whiteRobot->GetRobotMove()
                 : blackRobot->GetRobotMove();
@@ -465,24 +463,14 @@ long long BoardManager::getTimeRemaining(Color player) const {
 }
 
 void BoardManager::setPlayer(Color c) {
-    if (c == WHITE) {
-        is_white_player = true;
-    }
-
-    else {
-        is_black_player = true;
-    }
+    if (c == WHITE) is_white_player = true;
+    else is_black_player = true;
 
 }
 
 void BoardManager::setRobot(Color c){
-    if (c == WHITE) {
-        is_white_player = false;
-    }
-
-    else {
-        is_black_player = false;
-    }
+    if (c == WHITE) is_white_player = false;
+    else is_black_player = false;
 }
 
 void BoardManager::ClearSearchers() {
@@ -492,35 +480,33 @@ void BoardManager::ClearSearchers() {
 
 void BoardManager::setupBotsForNormalGame(const RobotSettings& rs) {
 
-    if (rs.isWhiteRobot && (whiteRobot == nullptr || dynamic_cast<ImpSearcher*>(whiteRobot.get()) == nullptr)) {
-        whiteRobot = createBot(SearcherType::IMRPOVED_SEARCHER);
+    if (rs.isWhiteRobot) {
+        whiteRobot = BotFactory::createBot(SearcherType::IMPROVED_SEARCHER, currentSettings.robotSettings);
         whiteRobot->setDifficulty(rs.whiteRobotDifficulty);
         setRobot(WHITE);
     }
 
-    if (rs.isBlackRobot && (blackRobot == nullptr || dynamic_cast<ImpSearcher*>(blackRobot.get()) == nullptr)) {
-        blackRobot = createBot(SearcherType::IMRPOVED_SEARCHER);
+    if (rs.isBlackRobot) {
+        blackRobot = BotFactory::createBot(SearcherType::IMPROVED_SEARCHER, currentSettings.robotSettings);
         blackRobot->setDifficulty(rs.blackRobotDifficulty);
         setRobot(BLACK);
     }
 
     setRobotTimeUsageMode(currentSettings.timeSettings.rtum);
+    updateRobotsState();
 }
 
 void BoardManager::prepareImprovedBotVsOldBot() {
-    if (whiteRobot == nullptr || dynamic_cast<ImpSearcher*>(whiteRobot.get()) == nullptr) {
-        whiteRobot = createBot(SearcherType::IMRPOVED_SEARCHER);
-        setDifficulty(WHITE, Difficulty::IMPOSSIBLE);
-        setRobot(WHITE);
-    }
+    whiteRobot = BotFactory::createBot(currentSettings.robotSettings.whiteBotType, currentSettings.robotSettings);
+    setDifficulty(WHITE, Difficulty::IMPOSSIBLE);
+    setRobot(WHITE);
 
-    if (blackRobot == nullptr || dynamic_cast<OSearcher*>(blackRobot.get()) == nullptr) {
-        blackRobot = createBot(SearcherType::OLD_SEARCHER);
-        setDifficulty(BLACK, Difficulty::IMPOSSIBLE);
-        setRobot(BLACK);
-    }
+    blackRobot = BotFactory::createBot(currentSettings.robotSettings.blackBotType, currentSettings.robotSettings);
+    setDifficulty(BLACK, Difficulty::IMPOSSIBLE);
+    setRobot(BLACK);
 
     setRobotTimeUsageMode(currentSettings.timeSettings.rtum);
+    updateRobotsState();
 
     VersionControl::manageBotVersion(whiteRobot->getNameToSaveInFile(), whiteRobot->getBotDirectoryPath());
     VersionControl::manageBotVersion(blackRobot->getNameToSaveInFile(), blackRobot->getBotDirectoryPath());
@@ -556,7 +542,7 @@ void BoardManager::setRobotTimeUsageMode(RobotTimeUsageMode rtum) {
 
 void BoardManager::setFixedTimePerMove(long long timePerMoveMs) {
     if (whiteRobot != nullptr) whiteRobot->setFixedTimePerMove(timePerMoveMs);
-    if (blackRobot != nullptr)blackRobot->setFixedTimePerMove(timePerMoveMs);
+    if (blackRobot != nullptr) blackRobot->setFixedTimePerMove(timePerMoveMs);
 }
 
 void BoardManager::updateRobotTournementTime() {

@@ -105,7 +105,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>D:\projects\Visual Studio projects\new-chess-in-cpp\assets;D:\projects\Visual Studio projects\new-chess-in-cpp\Board;D:\projects\Visual Studio projects\new-chess-in-cpp\bots\improvedSearcher;D:\projects\Visual Studio projects\new-chess-in-cpp\bots\oldSearcher;D:\projects\Visual Studio projects\new-chess-in-cpp\Utils;D:\projects\Visual Studio projects\new-chess-in-cpp\nnue-probe-master\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\projects\Visual Studio projects\new-chess-in-cpp\assets;D:\projects\Visual Studio projects\new-chess-in-cpp\Board;D:\projects\Visual Studio projects\new-chess-in-cpp\bots\improvedSearcher;D:\projects\Visual Studio projects\new-chess-in-cpp\bots\oldSearcher;D:\projects\Visual Studio projects\new-chess-in-cpp\Utils;D:\projects\Visual Studio projects\new-chess-in-cpp\nnue-probe-master\src;D:\projects\Visual Studio projects\new-chess-in-cpp\BotCreator;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
@@ -130,7 +130,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>D:\projects\Visual Studio projects\new-chess-in-cpp\assets;D:\projects\Visual Studio projects\new-chess-in-cpp\Board;D:\projects\Visual Studio projects\new-chess-in-cpp\bots\improvedSearcher;D:\projects\Visual Studio projects\new-chess-in-cpp\bots\oldSearcher;D:\projects\Visual Studio projects\new-chess-in-cpp\Utils;D:\projects\Visual Studio projects\new-chess-in-cpp\nnue-probe-master\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\projects\Visual Studio projects\new-chess-in-cpp\assets;D:\projects\Visual Studio projects\new-chess-in-cpp\Board;D:\projects\Visual Studio projects\new-chess-in-cpp\bots\improvedSearcher;D:\projects\Visual Studio projects\new-chess-in-cpp\bots\oldSearcher;D:\projects\Visual Studio projects\new-chess-in-cpp\Utils;D:\projects\Visual Studio projects\new-chess-in-cpp\nnue-probe-master\src;D:\projects\Visual Studio projects\new-chess-in-cpp\BotCreator;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
@@ -155,6 +155,7 @@
     <ClCompile Include="Board\resultmanager.cpp" />
     <ClCompile Include="Board\UCIParsing.cpp" />
     <ClCompile Include="Board\Zobrist.cpp" />
+    <ClCompile Include="BotCreator\BotFactory.cpp" />
     <ClCompile Include="bots\improvedSearcher\Evaluation.cpp" />
     <ClCompile Include="bots\improvedSearcher\MoveOrdering.cpp" />
     <ClCompile Include="bots\improvedSearcher\Searcher.cpp" />
@@ -189,10 +190,12 @@
     <ClInclude Include="Board\UCIParsing.h" />
     <ClInclude Include="Board\Utils.h" />
     <ClInclude Include="Board\Zobrist.h" />
+    <ClInclude Include="BotCreator\BotFactory.h" />
+    <ClInclude Include="BotCreator\SearcherType.h" />
     <ClInclude Include="bots\improvedSearcher\Evaluation.h" />
     <ClInclude Include="bots\improvedSearcher\MoveOrdering.h" />
     <ClInclude Include="bots\improvedSearcher\Searcher.h" />
-    <ClInclude Include="bots\improvedSearcher\SearcherSettings.h" />
+    <ClInclude Include="Board\SearcherSettings.h" />
     <ClInclude Include="bots\improvedSearcher\TranspositionTable.h" />
     <ClInclude Include="bots\improvedSearcher\WorseEvaluation.h" />
     <ClInclude Include="bots\oldSearcher\OldTranspotitionTable.h" />

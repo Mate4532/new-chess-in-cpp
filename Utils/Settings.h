@@ -2,12 +2,16 @@
 #define SETTINGS_H
 
 #include "Utils.h"
+#include <SearcherType.h>
 
 struct RobotSettings {
     bool isWhiteRobot = false;
     bool isBlackRobot = false;
+	SearcherType whiteBotType = SearcherType::IMPROVED_SEARCHER;
+	SearcherType blackBotType = SearcherType::IMPROVED_SEARCHER;
     bool isBotVsBot = false;
     int botSearchTimeMs = 1000;
+    int numThreads = 1;
     Difficulty whiteRobotDifficulty = Difficulty::EASY;
     Difficulty blackRobotDifficulty = Difficulty::EASY;
 
@@ -17,7 +21,9 @@ struct RobotSettings {
                whiteRobotDifficulty != other.whiteRobotDifficulty ||
                blackRobotDifficulty != other.blackRobotDifficulty ||
                isBotVsBot != other.isBotVsBot ||
-               botSearchTimeMs != other.botSearchTimeMs;
+               botSearchTimeMs != other.botSearchTimeMs ||
+               whiteBotType != other.whiteBotType ||
+               blackBotType != other.blackBotType;
     }
 };
 

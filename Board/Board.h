@@ -60,6 +60,8 @@ private:
     static uint64_t raw_bishop_magics[];
     static int raw_bishop_shifts[];
 
+    static uint64_t passed_pawn_mask[2][64];
+
     inline int GetSquare(int rank, int file) const {
         return rank * 8 + file;
     };
@@ -71,11 +73,13 @@ public:
     void InitializeBoard();
     void InitializeAttackTables();
     void InitializeMagicTables();
+    void InizializePassedPawnTable();
     uint64_t GenerateFullHash() const;
     uint64_t SetOccupancy(int index, int bits_in_mask, uint64_t mask);
     uint64_t maskRook(int sq);
     uint64_t maskBishop(int sq);
     void LoadFEN(std::string fen);
+    std::string GetFEN() const;
     void loadNewGame();
     PieceType getPieceAt(Square sq, Color color) const;
     uint64_t getBishopAttacksSlow(Square sq, uint64_t occupied) const;
@@ -137,6 +141,9 @@ public:
     inline std::vector<uint64_t> getRepetitionHash() const {
         return repetition_history.getHashes();
 	}
+    inline const RepetitionTable& getRepetitionTable() const {
+        return repetition_history;
+    }
     inline uint16_t getPly() const {
         return committedPly;
     }
@@ -181,6 +188,8 @@ public:
 
     bool HasNonPawnMaterial(Color color) const;
     bool hasPromotingPawn() const;
+    bool hasAdvancedPawn() const;
+    bool hasAdvancedPassedPawn(Color color) const;
     uint64_t getAttacksTo(Square sq, uint64_t occupied) const;
     Square getSmallestAttacker(uint64_t attackers, Color side, PieceType& attackerType) const;
     uint64_t getNewXRayAttacks(Square to, uint64_t occupied) const;
@@ -189,6 +198,7 @@ public:
 	bool IsDraw();
     bool IsCheckMate();
     bool isSquareAttacked(Square sq, Color attackerColor) const;
+    bool isPassedPawn(Color color, Square sq) const;
     bool MakeMove(Move move, bool in_search = false);
     void UndoMove(Move move, bool in_search = false);
     void MakeNullMove();

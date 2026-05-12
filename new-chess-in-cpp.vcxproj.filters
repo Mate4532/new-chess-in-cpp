@@ -96,6 +96,9 @@
     <ClCompile Include="bots\oldSearcher\OldLMR.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="BotCreator\BotFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Utils\PGNFormatter.h">
@@ -164,7 +167,7 @@
     <ClInclude Include="bots\improvedSearcher\Searcher.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="bots\improvedSearcher\SearcherSettings.h">
+    <ClInclude Include="Board\SearcherSettings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="bots\improvedSearcher\WorseEvaluation.h">
@@ -198,6 +201,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="bots\oldSearcher\OldLMR.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BotCreator\BotFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BotCreator\SearcherType.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
