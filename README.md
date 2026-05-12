@@ -34,4 +34,7 @@ The engine supports the core Universal Chess Interface (UCI) protocol. It can be
 
 Alternatively, you can run the executable directly from the command line (CMD/Terminal) and interact with it by manually entering standard UCI commands (e.g., `uci`, `isready`, `position startpos`, `go wtime 300000 btime 300000 winc 2000 binc 2000`).
 
-> **Note:** For the evaluation to function, the **NNUE file** must be placed in the same directory as the executable. While essential UCI commands are functional, certain features like **pondering** are not yet supported.
+> **Note:** While the essential UCI commands are functional, several advanced protocol features and configuration options—such as **pondering**, among others—are currently not supported.
+
+## Start & Requirements
+> **NNUE Evaluation File:** For the engine to function correctly, the trained **NNUE file** must be located in the **same directory** as the compiled executable. Without this file, the hybrid evaluation logic will not initialize.
