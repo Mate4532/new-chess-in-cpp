@@ -42,13 +42,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v145</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v145</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -105,7 +105,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>D:\projects\Visual Studio projects\new-chess-in-cpp\assets;D:\projects\Visual Studio projects\new-chess-in-cpp\Board;D:\projects\Visual Studio projects\new-chess-in-cpp\bots\improvedSearcher;D:\projects\Visual Studio projects\new-chess-in-cpp\bots\oldSearcher;D:\projects\Visual Studio projects\new-chess-in-cpp\Utils;D:\projects\Visual Studio projects\new-chess-in-cpp\nnue-probe-master\src;D:\projects\Visual Studio projects\new-chess-in-cpp\BotCreator;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\szeke\Qt-projects\new-chess-in-cpp\bots\oldSearcher;C:\Users\szeke\Qt-projects\new-chess-in-cpp\bots\improvedSearcher;C:\Users\szeke\Qt-projects\new-chess-in-cpp\nnue-probe-master\src;C:\Users\szeke\Qt-projects\new-chess-in-cpp\Utils;C:\Users\szeke\Qt-projects\new-chess-in-cpp\BotCreator;C:\Users\szeke\Qt-projects\new-chess-in-cpp\Board;C:\Users\szeke\Qt-projects\new-chess-in-cpp\bots;C:\Users\szeke\Qt-projects\new-chess-in-cpp\Utils;C:\Users\szeke\Qt-projects\new-chess-in-cpp\BotCreator;D:\projects\Visual Studio projects\new-chess-in-cpp\assets;D:\projects\Visual Studio projects\new-chess-in-cpp\Board;D:\projects\Visual Studio projects\new-chess-in-cpp\bots\improvedSearcher;D:\projects\Visual Studio projects\new-chess-in-cpp\bots\oldSearcher;D:\projects\Visual Studio projects\new-chess-in-cpp\Utils;D:\projects\Visual Studio projects\new-chess-in-cpp\nnue-probe-master\src;D:\projects\Visual Studio projects\new-chess-in-cpp\BotCreator;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
@@ -130,7 +130,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>D:\projects\Visual Studio projects\new-chess-in-cpp\assets;D:\projects\Visual Studio projects\new-chess-in-cpp\Board;D:\projects\Visual Studio projects\new-chess-in-cpp\bots\improvedSearcher;D:\projects\Visual Studio projects\new-chess-in-cpp\bots\oldSearcher;D:\projects\Visual Studio projects\new-chess-in-cpp\Utils;D:\projects\Visual Studio projects\new-chess-in-cpp\nnue-probe-master\src;D:\projects\Visual Studio projects\new-chess-in-cpp\BotCreator;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\szeke\Qt-projects\new-chess-in-cpp\bots\oldSearcher;C:\Users\szeke\Qt-projects\new-chess-in-cpp\bots\improvedSearcher;C:\Users\szeke\Qt-projects\new-chess-in-cpp\nnue-probe-master\src;C:\Users\szeke\Qt-projects\new-chess-in-cpp\Utils;C:\Users\szeke\Qt-projects\new-chess-in-cpp\BotCreator;C:\Users\szeke\Qt-projects\new-chess-in-cpp\Board;D:\projects\Visual Studio projects\new-chess-in-cpp\assets;D:\projects\Visual Studio projects\new-chess-in-cpp\Board;D:\projects\Visual Studio projects\new-chess-in-cpp\bots\improvedSearcher;D:\projects\Visual Studio projects\new-chess-in-cpp\bots\oldSearcher;D:\projects\Visual Studio projects\new-chess-in-cpp\Utils;D:\projects\Visual Studio projects\new-chess-in-cpp\nnue-probe-master\src;D:\projects\Visual Studio projects\new-chess-in-cpp\BotCreator;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
