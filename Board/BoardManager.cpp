@@ -3,6 +3,7 @@
 #include "UCIParsing.h"
 #include "openingloader.h"
 #include "versioncontrol.h"
+#include "SearcherType.h"
 
 #include <sstream>
 #include <atomic>
@@ -412,12 +413,6 @@ void BoardManager::runUCIService() {
                 updateRobotTournementTime();
             }
 
-            if ((board.getSideToMove() == WHITE && whiteRobot == nullptr) ||
-                (board.getSideToMove() == BLACK && blackRobot == nullptr)) {
-                setupBotsForNormalGame(currentSettings.robotSettings);
-                setRobotTimeUsageMode(currentSettings.timeSettings.rtum);
-            }
-
             Move best = (board.getSideToMove() == WHITE)
                 ? whiteRobot->GetRobotMove()
                 : blackRobot->GetRobotMove();
@@ -480,36 +475,38 @@ void BoardManager::ClearSearchers() {
 
 void BoardManager::setupBotsForNormalGame(const RobotSettings& rs) {
 
-    if (rs.isWhiteRobot) {
+    if (rs.isWhiteRobot && (whiteRobot == nullptr || dynamic_cast<ImpSearcher*>(whiteRobot.get()) == nullptr)) {
         whiteRobot = BotFactory::createBot(SearcherType::IMPROVED_SEARCHER, currentSettings.robotSettings);
         whiteRobot->setDifficulty(rs.whiteRobotDifficulty);
         setRobot(WHITE);
     }
 
-    if (rs.isBlackRobot) {
+    if (rs.isBlackRobot && (blackRobot == nullptr || dynamic_cast<ImpSearcher*>(blackRobot.get()) == nullptr)) {
         blackRobot = BotFactory::createBot(SearcherType::IMPROVED_SEARCHER, currentSettings.robotSettings);
         blackRobot->setDifficulty(rs.blackRobotDifficulty);
         setRobot(BLACK);
     }
 
     setRobotTimeUsageMode(currentSettings.timeSettings.rtum);
-    updateRobotsState();
 }
 
 void BoardManager::prepareImprovedBotVsOldBot() {
 
-	loadOpenings();
+    loadOpenings();
 
-    whiteRobot = BotFactory::createBot(currentSettings.robotSettings.whiteBotType, currentSettings.robotSettings);
-    setDifficulty(WHITE, Difficulty::IMPOSSIBLE);
-    setRobot(WHITE);
+    if (whiteRobot == nullptr || dynamic_cast<ImpSearcher*>(whiteRobot.get()) == nullptr) {
+        whiteRobot = BotFactory::createBot(SearcherType::IMPROVED_SEARCHER, currentSettings.robotSettings);
+        setDifficulty(WHITE, Difficulty::IMPOSSIBLE);
+        setRobot(WHITE);
+    }
 
-    blackRobot = BotFactory::createBot(currentSettings.robotSettings.blackBotType, currentSettings.robotSettings);
-    setDifficulty(BLACK, Difficulty::IMPOSSIBLE);
-    setRobot(BLACK);
+    if (blackRobot == nullptr || dynamic_cast<OSearcher*>(blackRobot.get()) == nullptr) {
+        blackRobot = BotFactory::createBot(SearcherType::OLD_SEARCHER, currentSettings.robotSettings);
+        setDifficulty(BLACK, Difficulty::IMPOSSIBLE);
+        setRobot(BLACK);
+    }
 
     setRobotTimeUsageMode(currentSettings.timeSettings.rtum);
-    updateRobotsState();
 
     VersionControl::manageBotVersion(whiteRobot->getNameToSaveInFile(), whiteRobot->getBotDirectoryPath());
     VersionControl::manageBotVersion(blackRobot->getNameToSaveInFile(), blackRobot->getBotDirectoryPath());
@@ -545,7 +542,7 @@ void BoardManager::setRobotTimeUsageMode(RobotTimeUsageMode rtum) {
 
 void BoardManager::setFixedTimePerMove(long long timePerMoveMs) {
     if (whiteRobot != nullptr) whiteRobot->setFixedTimePerMove(timePerMoveMs);
-    if (blackRobot != nullptr) blackRobot->setFixedTimePerMove(timePerMoveMs);
+    if (blackRobot != nullptr)blackRobot->setFixedTimePerMove(timePerMoveMs);
 }
 
 void BoardManager::updateRobotTournementTime() {

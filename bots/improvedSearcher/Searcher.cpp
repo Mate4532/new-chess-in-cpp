@@ -7,6 +7,7 @@
 #include <iostream>
 #include <thread>
 #include <cstring>
+#include <random>
 
 using namespace ImprovedSearcher;
 using namespace ImprovedEvaluation;
@@ -130,12 +131,9 @@ int Searcher::quiescence(int alpha, int beta, int ply) {
             }
         }
 
-        if (!inCheck && isCapture && !isPromo) {
+        if (!inCheck && isCapture) {
             if (currentScore < 0) {
-                bool givesCheck = board.isSquareAttacked(board.getKingSquare(enemy), player);
-                if (!givesCheck) {
-                    continue;
-                }
+                continue;
             }
         }
 
@@ -252,7 +250,7 @@ int Searcher::quiescence(int alpha, int beta, int ply) {
     return alpha;
 }
 
-int Searcher::negamax(int depth, int alpha, int beta, int ply, Move excludedMove) {
+int Searcher::negamax(int depth, int alpha, int beta, int ply) {
     pvLength[ply] = 0;
 
     if (shouldStop()) stop = true;
@@ -272,10 +270,12 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move excludedMove
     bool isPvNode = (beta - alpha > 1);
     int originalAlpha = alpha;
 
-    int ttScore;
-    Move ttMove;
+    int ttScore = 0;
+    Move ttMove = Move();
+    int ttDepth = 0;
+    TTFlag ttFlag;
 
-    bool foundInTT = tt->Probe(hash, ply, depth, alpha, beta, ttScore, ttMove);
+    bool foundInTT = tt->Probe(hash, ply, depth, alpha, beta, ttScore, ttMove, ttDepth, ttFlag);
 
     if (foundInTT && ply > 0 && !isPvNode) {
         if (ttMove.isValid()) {
@@ -291,7 +291,7 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move excludedMove
 
         negamax(iidDepth, alpha, beta, ply);
 
-        tt->Probe(hash, ply, iidDepth, alpha, beta, ttScore, ttMove);
+        tt->Probe(hash, ply, iidDepth, alpha, beta, ttScore, ttMove, ttDepth, ttFlag);
     }
 
     MoveList moves;
@@ -418,10 +418,6 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move excludedMove
 
         const Move& m = moves[i];
 
-        if (m.isValid() && excludedMove.isValid() && m == excludedMove) {
-            continue;
-        }
-
         nnue_state[ply + 1].dirtyPiece.dirtyNum = 0;
         nnue_state[ply + 1].accumulator.computedAccumulation = 0;
 
@@ -438,7 +434,7 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move excludedMove
         bool quiet = !isCapture && !isPromo;
         bool isCastle = (flags == KINGSIDE_CASTLE || flags == QUEENSIDE_CASTLE) && mPieceType == KING;
         bool isEp = flags == EN_PASSANT;
-        bool isPassedPawnPush = (mPieceType == PAWN) && board.isPassedPawn(player, mFrom);
+        bool isAdvancedPassedPawnPush = (mPieceType == PAWN) && board.isAdvancedPassedPawnPush(m);
 
         if (isCapture) {
 
@@ -551,45 +547,64 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move excludedMove
         tt->Prefetch(hash_after_move);
 
         int score = 0;
+
         int extension = 0;
 
         if (inCheck && isSingleReply) {
             extension = 1;
         }
+        else if (isPvNode && givesCheck && movesSearched == 1) {
+            extension = 1;
+        }
 
         if (movesSearched == 1) {
-            score = -negamax(depth + extension - 1, -beta, -alpha, ply + 1, Move());
+            score = -negamax(depth + extension - 1, -beta, -alpha, ply + 1);
         }
         else {
             int reduction = 0;
+            int seeScore = MoveOrdering::See(board, m);
+            bool badQuiet = quiet && (seeScore < 0);
 
-            if (depth >= 3 && movesSearched > 1 && quiet && !inCheck) {
-                if (!givesCheck && !isKiller && !isPassedPawnPush) {
-                    reduction = LMR::LMR::GetReduction(depth, movesSearched);
+            if (depth >= 3 && movesSearched > 1 && !inCheck) {
+                if (quiet) {
+                    reduction = LMR::LMR::GetReduction(depth, movesSearched, isPvNode);
 
-                    if (!improving) reduction += 1;
-                    if (isPvNode) reduction -= 1;
-
-                    if (staticEval != SCORE_NONE && staticEval + 150 < alpha) {
+                    if (!improving) {
                         reduction += 1;
                     }
 
-                    int histScore = historyMoves[player][mFrom][mTo];
-                    if (histScore > 4000) reduction -= 1;
-                    else if (histScore < 100) reduction += 1;
+                    if (badQuiet) {
+                        reduction += 1;
+                    }
+
+                    if (isKiller){
+                        reduction -= 1;
+                    }
+
+                    if (isAdvancedPassedPawnPush) {
+                        reduction -= 1;
+                    }
+
+                    if (givesCheck) {
+                        reduction -= 1;
+                    }
+
+                    reduction -= (historyMoves[player][mFrom][mTo] / 4000);
 
                     reduction = std::clamp(reduction, 0, depth - 2);
                 }
             }
 
-            score = -negamax(depth - 1 - reduction, -alpha - 1, -alpha, ply + 1, Move());
+            score = -negamax(depth - 1 - reduction, -alpha - 1, -alpha, ply + 1);
 
             if (score > alpha) {
+
                 if (reduction > 0) {
-                    score = -negamax(depth - 1, -alpha - 1, -alpha, ply + 1, Move());
+                    score = -negamax(depth - 1, -alpha - 1, -alpha, ply + 1);
                 }
+
                 if (score > alpha && score < beta) {
-                    score = -negamax(depth - 1, -beta, -alpha, ply + 1, Move());
+                    score = -negamax(depth - 1, -beta, -alpha, ply + 1);
                 }
             }
         }
@@ -635,10 +650,8 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply, Move excludedMove
         return inCheck ? -MATE_SCORE + ply : 0;
     }
 
-    if (!excludedMove.isValid()) {
-        TTFlag flag = (alpha <= originalAlpha) ? TT_ALPHA : TT_EXACT;
-        tt->Store(hash, alpha, ply, depth, flag, bestMoveThisNode);
-    }
+    TTFlag flag = (alpha <= originalAlpha) ? TT_ALPHA : TT_EXACT;
+    tt->Store(hash, alpha, ply, depth, flag, bestMoveThisNode);
 
     return alpha;
 }
@@ -714,13 +727,10 @@ Move Searcher::IterativeDeepening(bool silent) {
             movesString += m.toAlgebraic();
             movesString += " ";
         }
-
-        std::string debugString;
-        debugString += "\n";
-        debugString += "Beginner FEN: " + board.getBeginnerFen() + "\n";
-        debugString += "Current pos fen: " + board.GetFEN() + "\n";
-        debugString += "All moves: " + movesString + "\n";
-        LOG_DEBUG(debugString);
+        LOG_DEBUG("");
+        LOG_DEBUG("Beginner FEN: " << board.getBeginnerFen())
+        LOG_DEBUG("Current pos fen: " << board.GetFEN())
+        LOG_DEBUG("All moves: " << movesString)
     }
 
     MoveList rawRootMoves;
@@ -853,20 +863,19 @@ Move Searcher::IterativeDeepening(bool silent) {
 
         bool isMate = std::abs(lastScore) > MATE_SCORE_BOUND;
 
-        std::string debugString = "";
-
-        debugString += "Final Score: ";
+        std::string scorePart = "";
 
         if (isMate) {
             int mateIn = (lastScore > 0) ? (MATE_SCORE + 1 - lastScore) / 2 : -(MATE_SCORE + 1 + lastScore) / 2;
-            debugString += "mate " + std::to_string(mateIn) + " ";
-        } else {
+            scorePart = "mate " + std::to_string(mateIn);
+        }
+        else {
             int cpScore = (board.getSideToMove() == WHITE ? lastScore : -lastScore);
-            debugString += "cp " + std::to_string(cpScore) + " ";
+            scorePart = "cp " + std::to_string(cpScore);
         }
 
-        debugString += "| pv " + currentPvString + "\n";
-        LOG_DEBUG(debugString);
+        std::string outputString = "Final Score: " + scorePart + " | pv " + currentPvString;
+        LOG_DEBUG(outputString)
     }
 
     isSearching = false;
@@ -876,8 +885,212 @@ Move Searcher::IterativeDeepening(bool silent) {
     return bestMoveToPlay;
 }
 
-Move Searcher::GetRobotMove() {
+Move Searcher::GetBestAmongTopMoves(const SearcherSettings& settings) {
+    static std::mt19937 gen(now_ms());
+    std::uniform_int_distribution<> dis(1, 100);
 
+    PrepareSearcher();
+
+    if (settings.minNormalMovesAfterBlunder >= movesWithoutBlunderOnPropuse || dis(gen) > settings.chanceToActivatePossBlunder) {
+        movesWithoutBlunderOnPropuse++;
+        return IterativeDeepening();
+    }
+
+    MoveList moves;
+    MoveGenerator::GenerateMoves(board, moves);
+
+    Move dummyKillers[2] = { Move(), Move() };
+    int scores[MoveOrdering::SCORE_SIZE];
+    MoveOrdering::ScoreMoves(board, moves, Move(), historyMoves, dummyKillers, scores);
+
+    int n = (int)moves.size();
+    for (int i = 0; i < n - 1; i++) {
+        int best = i;
+        for (int j = i + 1; j < n; j++) {
+            if (scores[j] > scores[best])
+                best = j;
+        }
+        if (best != i) {
+            std::swap(scores[i], scores[best]);
+            std::swap(moves[i], moves[best]);
+        }
+    }
+    struct ScoredMove { Move m; int score; };
+    std::vector<ScoredMove> lastCompletedScores;
+
+    for (int i = 0; i < moves.size(); ++i) {
+        if (board.MakeMove(moves[i], true)) {
+            lastCompletedScores.push_back({moves[i], 0});
+            board.UndoMove(moves[i], true);
+        }
+    }
+
+    if (lastCompletedScores.empty()) return IterativeDeepening();
+
+    int targetDepth = std::max(settings.maxDepth - 2, 3);
+
+    for (int d = 1; d <= targetDepth; d++) {
+        std::vector<ScoredMove> currentDepthScores;
+        bool depthFinished = true;
+        Color us = board.getSideToMove();
+
+        for (auto& sm : lastCompletedScores) {
+            nnue_state[1].dirtyPiece.dirtyNum = 0;
+            nnue_state[1].accumulator.computedAccumulation = 0;
+
+            if (!board.MakeMove(sm.m, true)) continue;
+            int score = -negamax(d - 1, -MATE_SCORE, MATE_SCORE, 1);
+            board.UndoMove(sm.m, true);
+
+            if (stop) {
+                depthFinished = false;
+                break;
+            }
+
+            int realScore = us == WHITE ? score : -score;
+
+            currentDepthScores.push_back({sm.m, realScore});
+        }
+
+        if (depthFinished && !currentDepthScores.empty()) {
+            std::sort(currentDepthScores.begin(), currentDepthScores.end(),
+                      [us](const ScoredMove& a, const ScoredMove& b) { return us == WHITE ? a.score > b.score : a.score < b.score; });
+            lastCompletedScores = currentDepthScores;
+            if (std::abs(lastCompletedScores[0].score) > MATE_SCORE_BOUND) break;
+        } else {
+            break;
+        }
+
+        if (now_ms() - startTime >= softTimeLimit) {
+            break;
+        }
+    }
+
+    isSearching = false;
+
+    if (board.isDebugMode) {
+        std::cout << "info string --- Top 10 Initial Candidates ---" << std::endl;
+        int printLimit = std::min((int)lastCompletedScores.size(), 10);
+        for (int i = 0; i < printLimit; ++i) {
+            std::cout << "info string rank " << (i + 1)
+            << ": " << lastCompletedScores[i].m.toAlgebraic()
+            << " | score: " << lastCompletedScores[i].score << std::endl;
+        }
+    }
+
+    int bestScore = lastCompletedScores[0].score;
+    int limit = settings.topNMoveOff ? (int)lastCompletedScores.size() : std::min((int)lastCompletedScores.size(), settings.topNmove);
+
+    std::vector<int> validIndices;
+
+    if (board.isDebugMode && !lastCompletedScores.empty()) {
+        std::cout << "info string [FILTER] Removed best move: " << lastCompletedScores[0].m.toAlgebraic() << std::endl;
+    }
+
+    if (settings.takeFreePieces) {
+        for (int i = 0; i < std::min((int)lastCompletedScores.size(), 3); i++) {
+            Move m = lastCompletedScores[i].m;
+            bool isCap = (m.getFlags() & CAPTURE_FLAG);
+            Color us = board.getSideToMove();
+            Color enemy = (Color)(us ^ 1);
+
+            if (isCap) {
+                bool isProtected = board.isSquareAttacked(m.getTo(), enemy);
+
+                if (!isProtected) {
+                    if (board.isDebugMode) {
+                        std::cout << "info string [FREE PIECE] Found in 1 depth, best move made: " << m.toAlgebraic()
+                        << " (rank 1 | score " << lastCompletedScores[0].score << ")" << std::endl;
+                    }
+                    return lastCompletedScores[0].m;
+                }
+            }
+        }
+    }
+
+    for (int i = 1; i < limit; i++) {
+        if (std::abs(bestScore - lastCompletedScores[i].score) <= settings.blunderThreshold) {
+            bool isEmbarrassingBlunder = false;
+
+            if (settings.preventEmbarrassingBlunders) {
+                Move candidateMove = lastCompletedScores[i].m;
+                Color us = board.getSideToMove();
+
+                if (!isEmbarrassingBlunder && board.MakeMove(candidateMove, true)) {
+                    MoveList enemyCaptures;
+                    MoveGenerator::GenerateMoves(board, enemyCaptures, true);
+
+                    for (const auto& enemyMove : enemyCaptures) {
+                        if (enemyMove.getFlags() == EN_PASSANT) continue;
+
+                        PieceType myCapturedPiece = board.getPieceAt(enemyMove.getTo(), us);
+                        PieceType enemyAttackingPiece = enemyMove.getPieceType();
+
+                        if (myCapturedPiece >= KNIGHT && myCapturedPiece <= QUEEN) {
+                            bool isProtectedByUs = board.isSquareAttacked(enemyMove.getTo(), us);
+                            int valMyPiece = Evaluation::GetPieceValue(myCapturedPiece);
+                            int valEnemyPiece = Evaluation::GetPieceValue(enemyAttackingPiece);
+
+                            if (!isProtectedByUs || enemyAttackingPiece == PAWN || valMyPiece > valEnemyPiece) {
+                                isEmbarrassingBlunder = true;
+                                break;
+                            }
+                        }
+                    }
+                    board.UndoMove(candidateMove, true);
+                }
+            }
+
+            if (!isEmbarrassingBlunder) {
+                validIndices.push_back(i);
+            } else if (board.isDebugMode) {
+                std::cout << "info string [FILTER] Removed: embarrassing blunder: " << lastCompletedScores[i].m.toAlgebraic() << std::endl;
+            }
+        }
+        else {
+            std::cout << "info string [FILTER] Removed: out of threshold: " << lastCompletedScores[i].m.toAlgebraic() << std::endl;
+        }
+    }
+
+    if (validIndices.empty()) {
+        if (board.isDebugMode) {
+            std::cout << "info string [FALLBACK] No safe suboptimal moves found. Using best move." << std::endl;
+        }
+        validIndices.push_back(0);
+    }
+
+    if (board.isDebugMode) {
+        std::cout << "info string --- Final Valid Candidates (After Filtering) ---" << std::endl;
+        for (int idx : validIndices) {
+            std::cout << "info string rank " << (idx + 1) << ": " << lastCompletedScores[idx].m.toAlgebraic()
+            << " | score: " << lastCompletedScores[idx].score << (idx == 0 ? " (FILTERED BEST)" : "") << std::endl;
+        }
+    }
+
+    std::uniform_int_distribution<> topDis(0, validIndices.size() - 1);
+    int chosenIndex = validIndices[topDis(gen)];
+
+    if (board.isDebugMode) {
+        std::cout << "info string Bot picked move: " << lastCompletedScores[chosenIndex].m.toAlgebraic()
+        << " (rank " << (chosenIndex + 1) << " | score "
+        << lastCompletedScores[chosenIndex].score << ")" << std::endl;
+    }
+
+    movesWithoutBlunderOnPropuse = 0;
+    return lastCompletedScores[chosenIndex].m.isValid() ? lastCompletedScores[chosenIndex].m : lastCompletedScores[0].m;
+}
+
+Move Searcher::GetRobotMove() {
+    Move bestMove = GetMultiThreadedBestMove();
+
+    if (currentSettings.areBlundersOnPurposeEnabled) {
+        return GetBestAmongTopMoves(currentSettings);
+    }
+
+    return bestMove;
+}
+
+Move Searcher::GetMultiThreadedBestMove() {
     int numThreads = this->threads;
     if (numThreads < 1) numThreads = 1;
 
@@ -895,11 +1108,9 @@ Move Searcher::GetRobotMove() {
     HistorySnapshot histCopy;
     std::memcpy(histCopy.moves, this->historyMoves, sizeof(this->historyMoves));
 
-    std::shared_ptr<ImprovedTT::TranspositionTable> shared_tt = this->tt;
-
     for (int i = 0; i < numThreads - 1; ++i) {
-        helpers.emplace_back([this, board_snapshot, histCopy, shared_tt]() mutable {
-            auto helper = std::make_unique<Searcher>(shared_tt);
+        helpers.emplace_back([this, board_snapshot, histCopy]() mutable {
+            auto helper = std::make_unique<Searcher>(this->tt);
             helper->isHelper = true;
             helper->abortPtr = &this->stop;
             helper->board = board_snapshot;

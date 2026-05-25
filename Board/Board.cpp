@@ -669,6 +669,22 @@ bool Board::isPassedPawn(Color color, Square sq) const {
     return !(passed_pawn_mask[color][sq] & m_bitboards[enemy][PAWN]);
 }
 
+bool Board::isAdvancedPassedPawnPush(Move move) const {
+    if (move.getPieceType() != PAWN) return false;
+
+    Square to_sq = move.getTo();
+    Color player = m_side_to_move;
+
+    if (!isPassedPawn(player, to_sq)) return false;
+
+    int rank = to_sq / 8;
+    if (player == WHITE) {
+        return rank >= 5;
+    } else {
+        return rank <= 2;
+    }
+}
+
 bool Board::MakeMove(Move move, bool in_search) {
 
     Square from_sq = move.getFrom();

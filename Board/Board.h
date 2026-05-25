@@ -199,6 +199,7 @@ public:
     bool IsCheckMate();
     bool isSquareAttacked(Square sq, Color attackerColor) const;
     bool isPassedPawn(Color color, Square sq) const;
+    bool isAdvancedPassedPawnPush(Move move) const;
     bool MakeMove(Move move, bool in_search = false);
     void UndoMove(Move move, bool in_search = false);
     void MakeNullMove();
