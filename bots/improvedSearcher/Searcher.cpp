@@ -550,20 +550,20 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply) {
 
         int extension = 0;
 
-        if (inCheck && isSingleReply) {
+        if (isSingleReply) {
             extension = 1;
         }
-        else if (isPvNode && givesCheck && movesSearched == 1) {
-            extension = 1;
-        }
+        // else if (isPvNode && givesCheck && movesSearched == 1) {
+        //     extension = 1;
+        // }
 
         if (movesSearched == 1) {
             score = -negamax(depth + extension - 1, -beta, -alpha, ply + 1);
         }
         else {
             int reduction = 0;
-            int seeScore = MoveOrdering::See(board, m);
-            bool badQuiet = quiet && (seeScore < 0);
+            // int seeScore = MoveOrdering::See(board, m);
+            // bool badQuiet = quiet && (seeScore < 0);
 
             if (depth >= 3 && movesSearched > 1 && !inCheck) {
                 if (quiet) {
@@ -573,9 +573,9 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply) {
                         reduction += 1;
                     }
 
-                    if (badQuiet) {
-                        reduction += 1;
-                    }
+                    // if (badQuiet) {
+                    //     reduction += 1;
+                    // }
 
                     if (isKiller){
                         reduction -= 1;
@@ -585,13 +585,21 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply) {
                         reduction -= 1;
                     }
 
-                    if (givesCheck) {
-                        reduction -= 1;
-                    }
+                    // if (givesCheck) {
+                    //     reduction -= 1;
+                    // }
 
-                    reduction -= (historyMoves[player][mFrom][mTo] / 4000);
+                    int histScore = historyMoves[player][mFrom][mTo];
 
-                    reduction = std::clamp(reduction, 0, depth - 2);
+                    int baseline = 2000 + (depth * 500);
+
+                    int historyModifier = (baseline - histScore) / 2500;
+
+                    historyModifier = std::clamp(historyModifier, -1, 2);
+
+                    reduction += historyModifier;
+
+                    reduction = std::clamp(reduction, 0, depth);
                 }
             }
 
@@ -727,10 +735,10 @@ Move Searcher::IterativeDeepening(bool silent) {
             movesString += m.toAlgebraic();
             movesString += " ";
         }
-        LOG_DEBUG("");
-        LOG_DEBUG("Beginner FEN: " << board.getBeginnerFen())
-        LOG_DEBUG("Current pos fen: " << board.GetFEN())
-        LOG_DEBUG("All moves: " << movesString)
+        std::cout << std::endl;
+        std::cout << "Beginner FEN: " << board.getBeginnerFen() << std::endl;
+        std::cout << "Current pos fen: " << board.GetFEN() << std::endl;
+        std::cout << "All moves: " << movesString << std::endl;
     }
 
     MoveList rawRootMoves;
@@ -828,13 +836,13 @@ Move Searcher::IterativeDeepening(bool silent) {
             currentPvString = bestPvStringSoFar;
         }
 
-        if (!silent) LOG_DEBUG("info depth " << depth << " score "
+        if (!silent) std::cout << "info depth " << depth << " score "
                       << ((abs(score) > MATE_SCORE_BOUND)
                               ? "mate " + std::to_string((score > 0) ? (MATE_SCORE + 1 - score) / 2 : -(MATE_SCORE + 1 + score) / 2)
                               : "cp " + std::to_string(board.getSideToMove() == WHITE ? score : -score))
                       << " time " << timeSpent
                       << " nodes " << (nodes + localNodes)
-                      << " | pv " << currentPvString)
+                      << " | pv " << currentPvString << std::endl;
 
         if (IsMateScore(score) && score > 0) break;
 
@@ -857,25 +865,23 @@ Move Searcher::IterativeDeepening(bool silent) {
             currentPvString += pvTable[0][i].toAlgebraic() + " ";
         }
 
-        if (pvLength[0] == 0 || currentPvString.empty()) {
+        if (pvLength[0] == 0 || currentPvString.empty() || isStopped()) {
             currentPvString = bestPvStringSoFar;
         }
 
         bool isMate = std::abs(lastScore) > MATE_SCORE_BOUND;
 
-        std::string scorePart = "";
+        std::cout << "Final Score: ";
 
         if (isMate) {
             int mateIn = (lastScore > 0) ? (MATE_SCORE + 1 - lastScore) / 2 : -(MATE_SCORE + 1 + lastScore) / 2;
-            scorePart = "mate " + std::to_string(mateIn);
-        }
-        else {
+            std::cout << "mate " << mateIn << " ";
+        } else {
             int cpScore = (board.getSideToMove() == WHITE ? lastScore : -lastScore);
-            scorePart = "cp " + std::to_string(cpScore);
+            std::cout << "cp " << cpScore << " ";
         }
 
-        std::string outputString = "Final Score: " + scorePart + " | pv " + currentPvString;
-        LOG_DEBUG(outputString)
+        std::cout << "| pv " << currentPvString << std::endl;
     }
 
     isSearching = false;
