@@ -188,7 +188,7 @@ Move BoardManager::MakeRobotMove() {
         updateRobotTournementTime();
 
     Move robot_move;
-    LOG_DEBUG(std::cout << (board.getSideToMove() == WHITE ? (whiteRobot->getName() + " (feher) ") : (blackRobot->getName() + " (fekete) ")) <<"gondolkodik..." << std::endl;)
+    LOG_DEBUG(std::cout << (board.getSideToMove() == WHITE ? (whiteRobot->getName() + " (feher) ") : (blackRobot->getName() + " (fekete) ")) << "gondolkodik..." << std::endl;)
 	robot_move = board.getSideToMove() == WHITE ? whiteRobot->GetRobotMove() : blackRobot->GetRobotMove();
     if (!robot_move.isValid())
         return Move();
