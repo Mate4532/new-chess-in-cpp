@@ -15,8 +15,8 @@ int main() {
 	robotSettings.numThreads = 1;
 
 	TimeSettings timeSettings;
-	timeSettings.incrementSec = 0.1;
-	timeSettings.tournamentTimeSec = 10;
+	timeSettings.incrementSec = 0.6;
+	timeSettings.tournamentTimeSec = 60;
 	timeSettings.gm = GameMode::TOURNAMENT_MODE;
 	timeSettings.rtum = RobotTimeUsageMode::TOURNEMENT_TIME;
 
