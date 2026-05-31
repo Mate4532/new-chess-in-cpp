@@ -590,16 +590,6 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply) {
                         reduction -= 1;
                     }*/
 
-                    /*int histScore = historyMoves[player][mFrom][mTo];
-
-                    int baseline = 2000 + (depth * 500);
-
-                    int historyModifier = (baseline - histScore) / 2500;
-
-                    historyModifier = std::clamp(historyModifier, -1, 2);
-
-                    reduction += historyModifier;*/
-
                     int histScore = historyMoves[player][mFrom][mTo];
 
                     int historyModifier = -(histScore / 2048);

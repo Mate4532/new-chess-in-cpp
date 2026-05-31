@@ -537,12 +537,11 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply) {
 
                     int histScore = historyMoves[player][mFrom][mTo];
 
-                    if (histScore > 4000) {
-                        reduction -= 1;
-                    }
-                    else if (histScore < 100) {
-                        reduction += 1;
-                    }
+                    int historyModifier = -(histScore / 2048);
+
+                    historyModifier = std::clamp(historyModifier, -2, 2);
+
+                    reduction += historyModifier;
 
                     reduction = std::clamp(reduction, 0, depth - 2);
                 }
