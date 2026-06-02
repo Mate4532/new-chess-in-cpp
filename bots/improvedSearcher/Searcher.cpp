@@ -303,7 +303,7 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply) {
 
     bool inCheck = board.isSquareAttacked(board.getKingSquare(board.getSideToMove()), (Color)(board.getSideToMove() ^ 1));
 
-    /*bool isSingleReply = false;
+    bool isSingleReply = false;
 
     if (inCheck) {
         int legalEvasions = 0;
@@ -318,7 +318,7 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply) {
             }
         }
         isSingleReply = (legalEvasions == 1);
-    }*/
+    }
 
     int staticEval = SCORE_NONE;
     evalHistory[ply] = SCORE_NONE;
@@ -545,17 +545,17 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply) {
 
         int score = 0;
 
-        /*int extension = 0;
+        int extension = 0;
 
         if (isSingleReply) {
             extension = 1;
         }
         else if (isPvNode && givesCheck && movesSearched == 1) {
             extension = 1;
-        }*/
+        }
 
         if (movesSearched == 1) {
-            score = -negamax(depth - 1, -beta, -alpha, ply + 1); // depth + extension - 1
+            score = -negamax(depth + extension - 1, -beta, -alpha, ply + 1);
         }
         else {
             int reduction = 0;
@@ -598,7 +598,7 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply) {
 
                     reduction += historyModifier;
 
-                    reduction = std::clamp(reduction, 0, depth - 2);
+                    reduction = std::clamp(reduction, 0, depth - 2); // depth
                 }
             }
 
@@ -748,10 +748,10 @@ Move Searcher::IterativeDeepening(bool silent) {
             movesString += m.toAlgebraic();
             movesString += " ";
         }
-        LOG_DEBUG("\n")
-        LOG_DEBUG("Beginner FEN: " << board.getBeginnerFen())
-        LOG_DEBUG("Current pos fen: " << board.GetFEN())
-        LOG_DEBUG("All moves: " << movesString)
+        LOG_DEBUG("\n");
+        LOG_DEBUG("Beginner FEN: " << board.getBeginnerFen());
+        LOG_DEBUG("Current pos fen: " << board.GetFEN());
+        LOG_DEBUG("All moves: " << movesString);
     }
 
     MoveList rawRootMoves;
@@ -849,13 +849,13 @@ Move Searcher::IterativeDeepening(bool silent) {
             currentPvString = bestPvStringSoFar;
         }
 
-        if (!silent) LOG_DEBUG(<< "info depth " << depth << " score "
-                      << ((abs(score) > MATE_SCORE_BOUND)
-                              ? "mate " + std::to_string((score > 0) ? (MATE_SCORE + 1 - score) / 2 : -(MATE_SCORE + 1 + score) / 2)
-                              : "cp " + std::to_string(board.getSideToMove() == WHITE ? score : -score))
-                      << " time " << timeSpent
-                      << " nodes " << (nodes + localNodes)
-                      << " | pv " << currentPvString)
+        if (!silent) LOG_DEBUG("info depth " << depth << " score "
+            << ((abs(score) > MATE_SCORE_BOUND)
+                ? "mate " + std::to_string((score > 0) ? (MATE_SCORE + 1 - score) / 2 : -(MATE_SCORE + 1 + score) / 2)
+                : "cp " + std::to_string(board.getSideToMove() == WHITE ? score : -score))
+            << " time " << timeSpent
+            << " nodes " << (nodes + localNodes)
+            << " | pv " << currentPvString);
 
         if (IsMateScore(score) && score > 0) break;
 
@@ -884,17 +884,17 @@ Move Searcher::IterativeDeepening(bool silent) {
 
         bool isMate = std::abs(lastScore) > MATE_SCORE_BOUND;
 
-        LOG_DEBUG("Final Score: ")
+        LOG_DEBUG("Final Score: ");
 
         if (isMate) {
             int mateIn = (lastScore > 0) ? (MATE_SCORE + 1 - lastScore) / 2 : -(MATE_SCORE + 1 + lastScore) / 2;
-            LOG_DEBUG("mate " << mateIn << " ")
+            LOG_DEBUG("mate " << mateIn << " ");
         } else {
             int cpScore = (board.getSideToMove() == WHITE ? lastScore : -lastScore);
-            LOG_DEBUG("cp " << cpScore << " ")
+            LOG_DEBUG("cp " << cpScore << " ");
         }
 
-        LOG_DEBUG("| pv " << currentPvString)
+        LOG_DEBUG("| pv " << currentPvString);
     }
 
     isSearching = false;
@@ -988,12 +988,12 @@ Move Searcher::GetBestAmongTopMoves(const SearcherSettings& settings) {
     isSearching = false;
 
     if (board.isDebugMode) {
-        LOG_DEBUG(<< "info string --- Top 10 Initial Candidates ---")
+        LOG_DEBUG("info string --- Top 10 Initial Candidates ---")
         int printLimit = std::min((int)lastCompletedScores.size(), 10);
         for (int i = 0; i < printLimit; ++i) {
-            LOG_DEBUG(<< "info string rank " << (i + 1)
-            << ": " << lastCompletedScores[i].m.toAlgebraic()
-            << " | score: " << lastCompletedScores[i].score)
+            LOG_DEBUG("info string rank " << (i + 1)
+                << ": " << lastCompletedScores[i].m.toAlgebraic()
+                << " | score: " << lastCompletedScores[i].score);
         }
     }
 
@@ -1003,7 +1003,7 @@ Move Searcher::GetBestAmongTopMoves(const SearcherSettings& settings) {
     std::vector<int> validIndices;
 
     if (board.isDebugMode && !lastCompletedScores.empty()) {
-        LOG_DEBUG(<< "info string [FILTER] Removed best move: " << lastCompletedScores[0].m.toAlgebraic())
+        LOG_DEBUG("info string [FILTER] Removed best move: " << lastCompletedScores[0].m.toAlgebraic());
     }
 
     if (settings.takeFreePieces) {
@@ -1018,8 +1018,8 @@ Move Searcher::GetBestAmongTopMoves(const SearcherSettings& settings) {
 
                 if (!isProtected) {
                     if (board.isDebugMode) {
-                        LOG_DEBUG(<< "info string [FREE PIECE] Found in 1 depth, best move made: " << m.toAlgebraic()
-                        << " (rank 1 | score " << lastCompletedScores[0].score << ")")
+                        LOG_DEBUG("info string [FREE PIECE] Found in 1 depth, best move made: " << m.toAlgebraic()
+                            << " (rank 1 | score " << lastCompletedScores[0].score << ")");
                     }
                     return lastCompletedScores[0].m;
                 }
@@ -1063,26 +1063,26 @@ Move Searcher::GetBestAmongTopMoves(const SearcherSettings& settings) {
             if (!isEmbarrassingBlunder) {
                 validIndices.push_back(i);
             } else if (board.isDebugMode) {
-                LOG_DEBUG(<< "info string [FILTER] Removed: embarrassing blunder: " << lastCompletedScores[i].m.toAlgebraic())
+                LOG_DEBUG("info string [FILTER] Removed: embarrassing blunder: " << lastCompletedScores[i].m.toAlgebraic());
             }
         }
         else {
-            LOG_DEBUG(<< "info string [FILTER] Removed: out of threshold: " << lastCompletedScores[i].m.toAlgebraic())
+            LOG_DEBUG("info string [FILTER] Removed: out of threshold: " << lastCompletedScores[i].m.toAlgebraic());
         }
     }
 
     if (validIndices.empty()) {
         if (board.isDebugMode) {
-            LOG_DEBUG(<< "info string [FALLBACK] No safe suboptimal moves found. Using best move.")
+            LOG_DEBUG("info string [FALLBACK] No safe suboptimal moves found. Using best move.");
         }
         validIndices.push_back(0);
     }
 
     if (board.isDebugMode) {
-        LOG_DEBUG(<< "info string --- Final Valid Candidates (After Filtering) ---")
+        LOG_DEBUG("info string --- Final Valid Candidates (After Filtering) ---");
         for (int idx : validIndices) {
-            LOG_DEBUG(<< "info string rank " << (idx + 1) << ": " << lastCompletedScores[idx].m.toAlgebraic()
-            << " | score: " << lastCompletedScores[idx].score << (idx == 0 ? " (FILTERED BEST)" : ""))
+            LOG_DEBUG("info string rank " << (idx + 1) << ": " << lastCompletedScores[idx].m.toAlgebraic()
+                << " | score: " << lastCompletedScores[idx].score << (idx == 0 ? " (FILTERED BEST)" : ""));
         }
     }
 
@@ -1090,9 +1090,9 @@ Move Searcher::GetBestAmongTopMoves(const SearcherSettings& settings) {
     int chosenIndex = validIndices[topDis(gen)];
 
     if (board.isDebugMode) {
-        LOG_DEBUG(<< "info string Bot picked move: " << lastCompletedScores[chosenIndex].m.toAlgebraic()
-        << " (rank " << (chosenIndex + 1) << " | score "
-        << lastCompletedScores[chosenIndex].score << ")")
+        LOG_DEBUG("info string Bot picked move: " << lastCompletedScores[chosenIndex].m.toAlgebraic()
+            << " (rank " << (chosenIndex + 1) << " | score "
+            << lastCompletedScores[chosenIndex].score << ")");
     }
 
     movesWithoutBlunderOnPropuse = 0;

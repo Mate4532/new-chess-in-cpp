@@ -294,9 +294,22 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply) {
 
     bool inCheck = board.isSquareAttacked(board.getKingSquare(board.getSideToMove()), (Color)(board.getSideToMove() ^ 1));
 
-    // if (inCheck && ply < depth + 4) {
-    //     depth++;
-    // }
+    /*bool isSingleReply = false;
+
+    if (inCheck) {
+        int legalEvasions = 0;
+        for (int i = 0; i < moves.count; i++) {
+            if (board.MakeMove(moves[i], true)) {
+                legalEvasions++;
+                board.UndoMove(moves[i], true);
+
+                if (legalEvasions > 1) {
+                    break;
+                }
+            }
+        }
+        isSingleReply = (legalEvasions == 1);
+    }*/
 
     int staticEval = SCORE_NONE;
     evalHistory[ply] = SCORE_NONE;
@@ -516,6 +529,15 @@ int Searcher::negamax(int depth, int alpha, int beta, int ply) {
 
         int score = 0;
 
+        int extension = 0;
+
+        /*if (isSingleReply) {
+            extension = 1;
+        }
+        else if (isPvNode && givesCheck && movesSearched == 1) {
+            extension = 1;
+        }*/
+
         if (movesSearched == 1) {
             score = -negamax(depth - 1, -beta, -alpha, ply + 1);
         }
@@ -653,12 +675,12 @@ void Searcher::ClearKillers() {
     }
 }
 
-void Searcher::AgeHistory() {
-    for (int c = 0; c < 2; c++)
-        for (int f = 0; f < SQUARE_COUNT; f++)
-            for (int t = 0; t < SQUARE_COUNT; t++)
-                historyMoves[c][f][t] >>= 1;
-}
+//void Searcher::AgeHistory() {
+//    for (int c = 0; c < 2; c++)
+//        for (int f = 0; f < SQUARE_COUNT; f++)
+//            for (int t = 0; t < SQUARE_COUNT; t++)
+//                historyMoves[c][f][t] /= 2;
+//}
 
 void Searcher::ClearHistory() {
     for (int c = 0; c < 2; c++)
@@ -829,7 +851,7 @@ Move Searcher::GetRobotMove() {
     if (numThreads < 1) numThreads = 1;
 
     tt->NewWrite();
-    AgeHistory();
+    // AgeHistory();
 
     std::vector<std::thread> helpers;
 

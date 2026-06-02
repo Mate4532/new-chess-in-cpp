@@ -296,7 +296,6 @@ std::string Board::GetFEN() const {
                 else if (pt_white == KING) piece_char = 'K';
             }
             else {
-                // Ha nincs világos, megnézzük a sötétet
                 PieceType pt_black = getPieceAt(sq, BLACK);
                 if (pt_black != PIECE_NONE) {
                     if (pt_black == PAWN) piece_char = 'p';
@@ -1271,7 +1270,8 @@ PieceType Board::GetPromotionPiece(Move m) {
     return GetPromotionPiece(cleanPromotionFlag);
 }
 
-PieceType Board::GetPromotionPiece(MoveFlag promotion_piece) {
+PieceType Board::GetPromotionPiece(MoveFlag promotion_flag) {
+    int promotion_piece = promotion_flag & 0b1011;
     switch (promotion_piece) {
     case PROMOTION_TYPE_KNIGHT:
         return KNIGHT;
